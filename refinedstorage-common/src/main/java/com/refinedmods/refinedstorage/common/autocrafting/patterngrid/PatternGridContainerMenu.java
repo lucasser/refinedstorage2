@@ -17,7 +17,9 @@ import com.refinedmods.refinedstorage.common.support.containermenu.ValidatedSlot
 import com.refinedmods.refinedstorage.common.support.packet.c2s.C2SPackets;
 import com.refinedmods.refinedstorage.common.support.resource.ItemResource;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Nullable;
@@ -40,16 +42,17 @@ import org.apiguardian.api.API;
 public class PatternGridContainerMenu extends AbstractGridContainerMenu {
     private static final int Y_OFFSET_BETWEEN_PLAYER_INVENTORY_AND_PATTERN_INPUT_SLOT = 81;
     private static final int SPACING_BETWEEN_PATTERN_INPUT_AND_PATTERN_OUTPUT_SLOTS = 36;
-    private static final int Y_OFFSET_BETWEEN_PLAYER_INVENTORY_AND_FIRST_CRAFTING_MATRIX_SLOT = 85;
     private static final int Y_OFFSET_BETWEEN_PLAYER_INVENTORY_AND_FIRST_PROCESSING_MATRIX_SLOT = 76;
     private static final int Y_OFFSET_BETWEEN_PLAYER_INVENTORY_AND_STONECUTTER_SLOT = 63;
     private static final int Y_OFFSET_BETWEEN_PLAYER_INVENTORY_AND_SMITHING_TABLE_SLOTS = 63;
     private static final int INDIVIDUAL_PROCESSING_MATRIX_SIZE = 54;
 
+    private final Map<String, AbstractPatternMatrix> recipeTabs = new HashMap<>();
+    @Nullable
+    private final AbstractPatternMatrix activeTab = null;
+
     private final Container patternInput;
     private final Container patternOutput;
-    private final Container craftingMatrix;
-    private final Container craftingResult;
     private final ProcessingMatrixInputResourceContainer processingInput;
     private final ResourceContainer processingOutput;
     private final StonecutterInputContainer stonecutterInput;
@@ -76,8 +79,6 @@ public class PatternGridContainerMenu extends AbstractGridContainerMenu {
         this.processingOutput = PatternGridBlockEntity.createProcessingMatrixOutputContainer(
             patternGridData.processingOutputData()
         );
-        this.craftingMatrix = new RecipeMatrixContainer(null, 3, 3);
-        this.craftingResult = new ResultContainer();
         this.stonecutterInput = new StonecutterInputContainer(playerInventory.player::level);
         this.smithingTableMatrix = new RecipeMatrixContainer(null, 3, 1);
         this.smithingTableResult = new ResultContainer();
@@ -107,6 +108,7 @@ public class PatternGridContainerMenu extends AbstractGridContainerMenu {
             PatternGridPropertyTypes.STONECUTTER_SELECTED_RECIPE,
             patternGridData.stonecutterSelectedRecipe()
         ));
+        recipeTabs.put("minecraft:crafting", new CraftingPatternGridMenu(this, Menus.INSTANCE.getPatternGrid(), syncId));
     }
 
     PatternGridContainerMenu(final int syncId,
@@ -115,8 +117,6 @@ public class PatternGridContainerMenu extends AbstractGridContainerMenu {
         super(Menus.INSTANCE.getPatternGrid(), syncId, playerInventory, grid);
         this.patternInput = grid.getPatternInput();
         this.patternOutput = grid.getPatternOutput();
-        this.craftingMatrix = grid.getCraftingMatrix();
-        this.craftingResult = grid.getCraftingResult();
         this.stonecutterInput = grid.getStonecutterInput();
         this.processingInput = grid.getProcessingInput();
         this.processingOutput = grid.getProcessingOutput();
@@ -172,23 +172,14 @@ public class PatternGridContainerMenu extends AbstractGridContainerMenu {
         if (patternInput.getItem(0).isEmpty() && patternOutput.getItem(0).isEmpty()) {
             return false;
         }
-        return switch (getPatternType()) {
-            case CRAFTING -> !craftingResult.getItem(0).isEmpty();
-            case PROCESSING -> !processingInput.isEmpty() && !processingOutput.isEmpty();
-            case STONECUTTER -> !stonecutterInput.getItem(0).isEmpty() && getStonecutterSelectedRecipe() >= 0;
-            case SMITHING_TABLE -> !smithingTableResult.getItem(0).isEmpty();
-        };
+        return activeTab.canCreatePattern();
     }
 
     @Override
     public void resized(final int playerInventoryY, final int topYStart, final int topYEnd) {
         super.resized(playerInventoryY, topYStart, topYEnd);
         transferManager.clear();
-        addSmithingTableSlots(playerInventoryY); // these must be always first for the smithing table helpers
-        addPatternSlots(playerInventoryY);
-        addCraftingMatrixSlots(playerInventoryY);
-        addProcessingMatrixSlots(playerInventoryY);
-        addStonecutterSlots(playerInventoryY);
+        activeTab.matrix.addMatrixSlots(playerInventoryY);
     }
 
     int getFirstSmithingTableSlotIndex() {
@@ -247,39 +238,6 @@ public class PatternGridContainerMenu extends AbstractGridContainerMenu {
             return processingMatrixSlot.getResource();
         }
         return super.getResourceForAutocraftableHint(slot);
-    }
-
-    @Override
-    public boolean isLargeSlot(final Slot slot) {
-        return slot.container == craftingResult || super.isLargeSlot(slot);
-    }
-
-    private void addCraftingMatrixSlots(final int playerInventoryY) {
-        for (int y = 0; y < 3; ++y) {
-            for (int x = 0; x < 3; ++x) {
-                final int slotX = 13 + ((x % 3) * 18);
-                final int slotY = playerInventoryY
-                    - Y_OFFSET_BETWEEN_PLAYER_INVENTORY_AND_FIRST_CRAFTING_MATRIX_SLOT
-                    + ((y % 3) * 18);
-                addSlot(new FilterSlot(craftingMatrix, x + y * 3, slotX, slotY) {
-                    @Override
-                    public boolean isActive() {
-                        return getPatternType() == PatternType.CRAFTING;
-                    }
-                });
-            }
-        }
-        addSlot(new DisabledSlot(
-            craftingResult,
-            0,
-            117 + 4,
-            playerInventoryY - Y_OFFSET_BETWEEN_PLAYER_INVENTORY_AND_FIRST_CRAFTING_MATRIX_SLOT + 18
-        ) {
-            @Override
-            public boolean isActive() {
-                return getPatternType() == PatternType.CRAFTING;
-            }
-        });
     }
 
     private void addProcessingMatrixSlots(final int playerInventoryY) {
