@@ -77,6 +77,8 @@ import org.apiguardian.api.API;
 public interface RefinedStorageApi {
     RefinedStorageApi INSTANCE = new RefinedStorageApiProxy();
 
+    void registerWorkstation(Workstation);
+
     PlatformRegistry<StorageType> getStorageTypeRegistry();
 
     StorageRepository getClientStorageRepository();

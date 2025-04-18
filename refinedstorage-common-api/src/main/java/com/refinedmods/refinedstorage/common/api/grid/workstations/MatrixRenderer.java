@@ -1,4 +1,4 @@
-package com.refinedmods.refinedstorage.common.autocrafting.patterngrid;
+package com.refinedmods.refinedstorage.common.api.grid.workstations;
 
 import com.refinedmods.refinedstorage.common.support.containermenu.ResourceSlot;
 
@@ -10,7 +10,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.world.inventory.Slot;
 
-interface PatternGridRenderer {
+public interface MatrixRenderer {
     default void addWidgets(Consumer<AbstractWidget> widgets,
                             Consumer<AbstractWidget> renderables) {
         // no op
@@ -61,13 +61,13 @@ interface PatternGridRenderer {
         return false;
     }
 
-    default void patternTypeChanged(PatternType newPatternType) {
+    default void workstationChanged(String newPatternType) {
         // no op
     }
 
-    default void fuzzyModeChanged(boolean newFuzzyMode) {
-        // no op
-    }
+//    default void fuzzyModeChanged(boolean newFuzzyMode) {
+//        // no op
+//    }
 
     default boolean canInteractWithResourceSlot(ResourceSlot resourceSlot,
                                                 double mouseX,
