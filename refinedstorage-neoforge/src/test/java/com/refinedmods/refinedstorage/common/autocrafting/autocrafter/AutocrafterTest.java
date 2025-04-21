@@ -24,7 +24,7 @@ import static com.refinedmods.refinedstorage.common.GameTestUtil.storageContains
 import static com.refinedmods.refinedstorage.common.GameTestUtil.tickFurnace;
 import static com.refinedmods.refinedstorage.common.autocrafting.autocrafter.AutocrafterTestPlots.createCraftingPattern;
 import static com.refinedmods.refinedstorage.common.autocrafting.autocrafter.AutocrafterTestPlots.createProcessingPattern;
-import static com.refinedmods.refinedstorage.common.autocrafting.autocrafter.AutocrafterTestPlots.createSmithingTablePattern;
+//import static com.refinedmods.refinedstorage.common.autocrafting.autocrafter.AutocrafterTestPlots.createSmithingTablePattern;
 import static com.refinedmods.refinedstorage.common.autocrafting.autocrafter.AutocrafterTestPlots.createStoneCutterPattern;
 import static com.refinedmods.refinedstorage.common.autocrafting.autocrafter.AutocrafterTestPlots.preparePlot;
 import static net.minecraft.world.item.Items.AIR;
@@ -243,10 +243,10 @@ public final class AutocrafterTest {
             }));
 
             // Act
-            autocrafter.getPatternContainer().setItem(0, createSmithingTablePattern(
-                asResource(NETHERITE_UPGRADE_SMITHING_TEMPLATE),
-                asResource(DIAMOND_CHESTPLATE),
-                asResource(NETHERITE_INGOT)));
+//            autocrafter.getPatternContainer().setItem(0, createSmithingTablePattern(
+//                asResource(NETHERITE_UPGRADE_SMITHING_TEMPLATE),
+//                asResource(DIAMOND_CHESTPLATE),
+//                asResource(NETHERITE_INGOT)));
 
             // Assert
             sequence

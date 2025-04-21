@@ -2,6 +2,7 @@ package com.refinedmods.refinedstorage.common.autocrafting.patterngrid;
 
 import com.refinedmods.refinedstorage.common.Platform;
 import com.refinedmods.refinedstorage.common.grid.AutocraftableResourceHint;
+import com.refinedmods.refinedstorage.common.api.grid.workstations.MatrixRenderer;
 import com.refinedmods.refinedstorage.common.grid.screen.AbstractGridScreen;
 import com.refinedmods.refinedstorage.common.support.ResourceSlotRendering;
 import com.refinedmods.refinedstorage.common.support.containermenu.ResourceSlot;
@@ -23,7 +24,7 @@ import static com.refinedmods.refinedstorage.common.util.IdentifierUtil.createId
 import static com.refinedmods.refinedstorage.common.util.IdentifierUtil.createTranslation;
 import static net.minecraft.client.gui.screens.inventory.AbstractContainerScreen.renderSlotHighlight;
 
-class ProcessingPatternGridRenderer implements PatternGridRenderer {
+class ProcessingPatternGridRenderer implements MatrixRenderer {
     private static final ResourceLocation PROCESSING = createIdentifier("pattern_grid/processing");
     private static final ResourceLocation PROCESSING_MATRIX = createIdentifier("pattern_grid/processing_matrix");
     private static final int INDIVIDUAL_PROCESSING_MATRIX_SIZE = 54;
@@ -141,7 +142,7 @@ class ProcessingPatternGridRenderer implements PatternGridRenderer {
     }
 
     private static boolean isScrollbarVisible(final PatternGridContainerMenu menu) {
-        return menu.getPatternType() == PatternType.PROCESSING;
+        return menu.getPatternType().equals("minecraft:processing");
     }
 
     @Override
@@ -319,7 +320,7 @@ class ProcessingPatternGridRenderer implements PatternGridRenderer {
     }
 
     @Override
-    public void patternTypeChanged(final PatternType newPatternType) {
+    public void workstationChanged(final String newPatternType) {
         if (scrollbar != null) {
             scrollbar.visible = isScrollbarVisible(menu);
         }

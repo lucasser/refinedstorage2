@@ -1,8 +1,8 @@
-package com.refinedmods.refinedstorage.common.autocrafting.patterngrid;
+package com.refinedmods.refinedstorage.common.grid.crafting.renderer;
 
+import com.refinedmods.refinedstorage.common.api.grid.workstations.MatrixRenderer;
 import com.refinedmods.refinedstorage.common.autocrafting.VanillaConstants;
 import com.refinedmods.refinedstorage.common.grid.crafting.StonecuttingGridMenu;
-import com.refinedmods.refinedstorage.common.grid.crafting.renderer.StonecutterGridRenderer;
 import com.refinedmods.refinedstorage.common.support.widget.ScrollbarWidget;
 import com.refinedmods.refinedstorage.common.util.ClientPlatformUtil;
 
@@ -25,14 +25,22 @@ import static com.refinedmods.refinedstorage.common.autocrafting.patterngrid.Pat
 import static com.refinedmods.refinedstorage.common.util.IdentifierUtil.createIdentifier;
 import static java.util.Objects.requireNonNull;
 
-public class StonecutterPatternGridRenderer extends StonecutterGridRenderer {
+public class StonecutterGridRenderer implements MatrixRenderer {
     private static final ResourceLocation SPRITE = createIdentifier("pattern_grid/stonecutter");
 
     @Nullable
     private ScrollbarWidget scrollbar;
 
-    StonecutterPatternGridRenderer(final StonecuttingGridMenu menu, final int leftPos, final int x, final int y) {
-        super(menu, leftPos, x, y);
+    protected final StonecuttingGridMenu menu;
+    protected final int leftPos;
+    protected final int x;
+    protected final int y;
+
+    public StonecutterGridRenderer(final StonecuttingGridMenu menu, final int leftPos, final int x, final int y) {
+        this.menu = menu;
+        this.leftPos = leftPos;
+        this.x = x;
+        this.y = y;
     }
 
     @Override
@@ -183,11 +191,12 @@ public class StonecutterPatternGridRenderer extends StonecutterGridRenderer {
             && scrollbar.mouseScrolled(mouseX, mouseY, mouseZ, delta);
     }
 
-    public void patternTypeChanged(final PatternType newPatternType) {
-        if (scrollbar != null) {
-            scrollbar.visible = isScrollbarVisible(menu);
-        }
-    }
+//    @Override
+//    public void recipeChanged(final PatternType newPatternType) {
+//        if (scrollbar != null) {
+//            scrollbar.visible = isScrollbarVisible(menu);
+//        }
+//    }
 
     private static boolean isScrollbarVisible(final StonecuttingGridMenu menu) {
         return menu.getRecipeType().equals("minecraft:stonecutter");

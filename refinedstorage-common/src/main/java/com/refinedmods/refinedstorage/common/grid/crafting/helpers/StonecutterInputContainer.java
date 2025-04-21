@@ -1,4 +1,4 @@
-package com.refinedmods.refinedstorage.common.autocrafting.patterngrid;
+package com.refinedmods.refinedstorage.common.grid.crafting.helpers;
 
 import com.refinedmods.refinedstorage.api.core.NullableType;
 
@@ -16,30 +16,30 @@ import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
 import net.minecraft.world.level.Level;
 
-class StonecutterInputContainer extends SimpleContainer implements ContainerListener {
+public class StonecutterInputContainer extends SimpleContainer implements ContainerListener {
     private List<RecipeHolder<StonecutterRecipe>> recipes = Collections.emptyList();
     private final Supplier<Level> levelSupplier;
     private int selectedRecipe;
 
-    StonecutterInputContainer(final Supplier<@NullableType Level> levelSupplier) {
+    public StonecutterInputContainer(final Supplier<@NullableType Level> levelSupplier) {
         super(1);
         this.levelSupplier = levelSupplier;
         addListener(this);
     }
 
-    List<RecipeHolder<StonecutterRecipe>> getRecipes() {
+    public List<RecipeHolder<StonecutterRecipe>> getRecipes() {
         return recipes;
     }
 
-    int getSelectedRecipe() {
+    public int getSelectedRecipe() {
         return selectedRecipe;
     }
 
-    boolean hasSelectedRecipe() {
+    public boolean hasSelectedRecipe() {
         return selectedRecipe >= 0;
     }
 
-    void setSelectedRecipe(final int idx) {
+    public void setSelectedRecipe(final int idx) {
         this.selectedRecipe = idx;
     }
 
@@ -53,7 +53,7 @@ class StonecutterInputContainer extends SimpleContainer implements ContainerList
         this.updateRecipes(level);
     }
 
-    void updateRecipes(final Level level) {
+    public void updateRecipes(final Level level) {
         final ItemStack input = getItem(0);
         if (input.isEmpty()) {
             recipes = Collections.emptyList();

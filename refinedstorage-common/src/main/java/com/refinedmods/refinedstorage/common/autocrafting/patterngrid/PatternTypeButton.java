@@ -1,5 +1,6 @@
 package com.refinedmods.refinedstorage.common.autocrafting.patterngrid;
 
+import com.refinedmods.refinedstorage.common.grid.crafting.WorkstationMenuRegistry;
 import com.refinedmods.refinedstorage.common.support.widget.CustomButton;
 
 import java.util.function.Consumer;
@@ -19,18 +20,18 @@ class PatternTypeButton extends CustomButton {
         createIdentifier("widget/generic_small_button_disabled")
     );
 
-    private final PatternType patternType;
+    private final WorkstationMenuRegistry.WorkstationRegistryElement workstation;
     private boolean selected;
 
     PatternTypeButton(final int x,
                       final int y,
                       final Consumer<CustomButton> onPress,
-                      final PatternType patternType,
+                      final WorkstationMenuRegistry.WorkstationRegistryElement patternType,
                       final boolean selected) {
-        super(x, y, 16, 16, GENERIC_SMALL_BUTTON_SPRITES, onPress, patternType.getTranslatedName());
-        this.patternType = patternType;
+        super(x, y, 16, 16, GENERIC_SMALL_BUTTON_SPRITES, onPress, patternType.translatedName);
+        this.workstation = patternType;
         this.selected = selected;
-        this.setTooltip(Tooltip.create(patternType.getTranslatedName()));
+        this.setTooltip(Tooltip.create(patternType.translatedName));
     }
 
     void setSelected(final boolean selected) {
@@ -41,6 +42,6 @@ class PatternTypeButton extends CustomButton {
     public void renderWidget(final GuiGraphics graphics, final int x, final int y, final float partialTicks) {
         final ResourceLocation location = sprites.get(isActive(), isHovered() || selected);
         graphics.blitSprite(location, getX(), getY(), width, height);
-        graphics.renderItem(patternType.getStack(), getX(), getY());
+        graphics.renderItem(workstation.icon, getX(), getY());
     }
 }

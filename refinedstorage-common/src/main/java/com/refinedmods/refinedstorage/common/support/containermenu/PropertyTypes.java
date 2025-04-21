@@ -1,6 +1,7 @@
 package com.refinedmods.refinedstorage.common.support.containermenu;
 
 import com.refinedmods.refinedstorage.api.resource.filter.FilterMode;
+import com.refinedmods.refinedstorage.common.grid.crafting.helpers.WorkstationSettings;
 import com.refinedmods.refinedstorage.common.support.FilterModeSettings;
 import com.refinedmods.refinedstorage.common.support.RedstoneMode;
 import com.refinedmods.refinedstorage.common.support.RedstoneModeSettings;
@@ -27,6 +28,12 @@ public final class PropertyTypes {
         createIdentifier("scheduling_mode"),
         SchedulingModeType::getId,
         SchedulingModeType::getById
+    );
+
+    public static final PropertyType<String> WORKSTATION_TYPE = new PropertyType<>(
+        createIdentifier("filter_mode"),
+        WorkstationSettings::getWorkstationId,
+        WorkstationSettings::getWorkstationName
     );
 
     public static final PropertyType<Boolean> FUZZY_MODE = createBooleanProperty(createIdentifier("fuzzy_mode"));

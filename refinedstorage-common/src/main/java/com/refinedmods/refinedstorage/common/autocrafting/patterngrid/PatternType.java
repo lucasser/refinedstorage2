@@ -9,10 +9,10 @@ import net.minecraft.world.item.Items;
 import static com.refinedmods.refinedstorage.common.util.IdentifierUtil.createTranslation;
 
 public enum PatternType implements StringRepresentable {
-    CRAFTING(Items.CRAFTING_TABLE.getDefaultInstance(), "crafting"),
-    PROCESSING(Items.FURNACE.getDefaultInstance(), "processing"),
-    STONECUTTER(Items.STONECUTTER.getDefaultInstance(), "stonecutter"),
-    SMITHING_TABLE(Items.SMITHING_TABLE.getDefaultInstance(), "smithing_table");
+    CRAFTING(Items.CRAFTING_TABLE.getDefaultInstance(), "minecraft:crafting"),
+    PROCESSING(Items.FURNACE.getDefaultInstance(), "minecraft:processing"),
+    STONECUTTER(Items.STONECUTTER.getDefaultInstance(), "minecraft:stonecutter");
+    //SMITHING_TABLE(Items.SMITHING_TABLE.getDefaultInstance(), "smithing_table");
 
     public static final Codec<PatternType> CODEC = StringRepresentable.fromValues(PatternType::values);
 
@@ -34,18 +34,18 @@ public enum PatternType implements StringRepresentable {
         return translatedName;
     }
 
-    PatternGridRenderer createRenderer(final PatternGridContainerMenu menu,
-                                       final int leftPos,
-                                       final int topPos,
-                                       final int x,
-                                       final int y) {
-        return switch (this) {
-            case CRAFTING -> new CraftingPatternGridRenderer(menu, leftPos, x, y);
-            case PROCESSING -> new ProcessingPatternGridRenderer(menu, leftPos, topPos, x, y);
-            case STONECUTTER -> new StonecutterPatternGridRenderer(menu, leftPos, x, y);
-            case SMITHING_TABLE -> new SmithingTablePatternGridRenderer(menu, leftPos, topPos, x, y);
-        };
-    }
+//    MatrixRenderer createRenderer(final PatternGridContainerMenu menu,
+//                                  final int leftPos,
+//                                  final int topPos,
+//                                  final int x,
+//                                  final int y) {
+//        return switch (this) {
+//            case CRAFTING -> new CraftingPatternGridRenderer(menu, leftPos, x, y);
+//            case PROCESSING -> new ProcessingPatternGridRenderer(menu, leftPos, topPos, x, y);
+//            case STONECUTTER -> new StonecutterPatternGridRenderer(menu, leftPos, x, y);
+//            //case SMITHING_TABLE -> new SmithingTablePatternGridRenderer(menu, leftPos, topPos, x, y);
+//        };
+//    }
 
     @Override
     public String getSerializedName() {

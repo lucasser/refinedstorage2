@@ -9,13 +9,13 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
 public record PatternGridData(GridData gridData,
-                              PatternType patternType,
+                              String patternType,
                               ProcessingInputData processingInputData,
                               ResourceContainerData processingOutputData,
                               int stonecutterSelectedRecipe) {
     public static final StreamCodec<RegistryFriendlyByteBuf, PatternGridData> STREAM_CODEC = StreamCodec.composite(
         GridData.STREAM_CODEC, PatternGridData::gridData,
-        PlatformUtil.enumStreamCodec(PatternType.values()), PatternGridData::patternType,
+        ByteBufCodecs.STRING_UTF8, PatternGridData::patternType,
         ProcessingInputData.STREAM_CODEC, PatternGridData::processingInputData,
         ResourceContainerData.STREAM_CODEC, PatternGridData::processingOutputData,
         ByteBufCodecs.INT, PatternGridData::stonecutterSelectedRecipe,

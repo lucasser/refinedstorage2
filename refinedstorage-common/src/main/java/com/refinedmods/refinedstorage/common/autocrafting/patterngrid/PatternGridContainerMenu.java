@@ -2,15 +2,15 @@ package com.refinedmods.refinedstorage.common.autocrafting.patterngrid;
 
 import com.refinedmods.refinedstorage.api.resource.ResourceAmount;
 import com.refinedmods.refinedstorage.api.resource.ResourceKey;
+import com.refinedmods.refinedstorage.common.api.grid.workstations.AbstractPatternMatrix;
 import com.refinedmods.refinedstorage.common.api.support.resource.ResourceContainer;
 import com.refinedmods.refinedstorage.common.content.Menus;
 import com.refinedmods.refinedstorage.common.grid.AbstractGridContainerMenu;
+import com.refinedmods.refinedstorage.common.grid.crafting.CraftingGridMenu;
 import com.refinedmods.refinedstorage.common.support.FilteredContainer;
 import com.refinedmods.refinedstorage.common.support.RecipeMatrixContainer;
 import com.refinedmods.refinedstorage.common.support.RedstoneMode;
 import com.refinedmods.refinedstorage.common.support.containermenu.ClientProperty;
-import com.refinedmods.refinedstorage.common.support.containermenu.DisabledSlot;
-import com.refinedmods.refinedstorage.common.support.containermenu.FilterSlot;
 import com.refinedmods.refinedstorage.common.support.containermenu.PropertyTypes;
 import com.refinedmods.refinedstorage.common.support.containermenu.ServerProperty;
 import com.refinedmods.refinedstorage.common.support.containermenu.ValidatedSlot;
@@ -35,7 +35,6 @@ import net.minecraft.world.item.SmithingTemplateItem;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.SmithingRecipe;
-import net.minecraft.world.item.crafting.StonecutterRecipe;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apiguardian.api.API;
 
@@ -43,19 +42,17 @@ public class PatternGridContainerMenu extends AbstractGridContainerMenu {
     private static final int Y_OFFSET_BETWEEN_PLAYER_INVENTORY_AND_PATTERN_INPUT_SLOT = 81;
     private static final int SPACING_BETWEEN_PATTERN_INPUT_AND_PATTERN_OUTPUT_SLOTS = 36;
     private static final int Y_OFFSET_BETWEEN_PLAYER_INVENTORY_AND_FIRST_PROCESSING_MATRIX_SLOT = 76;
-    private static final int Y_OFFSET_BETWEEN_PLAYER_INVENTORY_AND_STONECUTTER_SLOT = 63;
     private static final int Y_OFFSET_BETWEEN_PLAYER_INVENTORY_AND_SMITHING_TABLE_SLOTS = 63;
     private static final int INDIVIDUAL_PROCESSING_MATRIX_SIZE = 54;
 
     private final Map<String, AbstractPatternMatrix> recipeTabs = new HashMap<>();
     @Nullable
-    private final AbstractPatternMatrix activeTab = null;
+    public AbstractPatternMatrix activeTab;
 
     private final Container patternInput;
     private final Container patternOutput;
     private final ProcessingMatrixInputResourceContainer processingInput;
     private final ResourceContainer processingOutput;
-    private final StonecutterInputContainer stonecutterInput;
     private final Container smithingTableMatrix;
     private final Container smithingTableResult;
     private final List<RecipeHolder<SmithingRecipe>> smithingTableRecipes;
@@ -79,16 +76,18 @@ public class PatternGridContainerMenu extends AbstractGridContainerMenu {
         this.processingOutput = PatternGridBlockEntity.createProcessingMatrixOutputContainer(
             patternGridData.processingOutputData()
         );
-        this.stonecutterInput = new StonecutterInputContainer(playerInventory.player::level);
         this.smithingTableMatrix = new RecipeMatrixContainer(null, 3, 1);
         this.smithingTableResult = new ResultContainer();
         this.smithingTableRecipes = playerInventory.player.level().getRecipeManager()
             .getAllRecipesFor(RecipeType.SMITHING);
+        recipeTabs.put("minecraft:crafting", new CraftingPatternGridMenu(playerInventory, Menus.INSTANCE.getPatternGrid(), syncId));
+        recipeTabs.put("minecraft:stonecutting", new CraftingPatternGridMenu(playerInventory, Menus.INSTANCE.getPatternGrid(), syncId));
+        activeTab = recipeTabs.get("minecraft:crafting");
         resized(0, 0, 0);
         registerProperty(new ClientProperty<>(PropertyTypes.REDSTONE_MODE, RedstoneMode.IGNORE));
-        registerProperty(new ClientProperty<>(PatternGridPropertyTypes.PATTERN_TYPE, patternGridData.patternType()) {
+        registerProperty(new ClientProperty<>(PropertyTypes.WORKSTATION_TYPE, "minecraft:crafting") {
             @Override
-            protected void onChangedOnClient(final PatternType newValue) {
+            protected void onChangedOnClient(final String newValue) {
                 super.onChangedOnClient(newValue);
                 if (listener != null) {
                     listener.patternTypeChanged(newValue);
@@ -108,7 +107,6 @@ public class PatternGridContainerMenu extends AbstractGridContainerMenu {
             PatternGridPropertyTypes.STONECUTTER_SELECTED_RECIPE,
             patternGridData.stonecutterSelectedRecipe()
         ));
-        recipeTabs.put("minecraft:crafting", new CraftingPatternGridMenu(this, Menus.INSTANCE.getPatternGrid(), syncId));
     }
 
     PatternGridContainerMenu(final int syncId,
@@ -117,7 +115,7 @@ public class PatternGridContainerMenu extends AbstractGridContainerMenu {
         super(Menus.INSTANCE.getPatternGrid(), syncId, playerInventory, grid);
         this.patternInput = grid.getPatternInput();
         this.patternOutput = grid.getPatternOutput();
-        this.stonecutterInput = grid.getStonecutterInput();
+        //this.stonecutterInput = grid.getStonecutterInput();
         this.processingInput = grid.getProcessingInput();
         this.processingOutput = grid.getProcessingOutput();
         this.smithingTableMatrix = grid.getSmithingTableMatrix();
@@ -125,6 +123,11 @@ public class PatternGridContainerMenu extends AbstractGridContainerMenu {
         this.smithingTableRecipes = playerInventory.player.level().getRecipeManager()
             .getAllRecipesFor(RecipeType.SMITHING);
         this.patternGrid = grid;
+        recipeTabs.put("minecraft:stonecutting", new CraftingPatternGridMenu(playerInventory, Menus.INSTANCE.getPatternGrid(), syncId));
+        recipeTabs.put("minecraft:crafting", new CraftingPatternGridMenu(playerInventory, Menus.INSTANCE.getPatternGrid(), syncId));
+        activeTab = recipeTabs.get("minecraft:crafting");
+        ((CraftingGridMenu) activeTab.getMatrix()).craftingMatrix = grid.getCraftingMatrix();
+        ((CraftingGridMenu) activeTab.getMatrix()).craftingResult = grid.getCraftingResult();
         resized(0, 0, 0);
         registerProperty(new ServerProperty<>(
             PropertyTypes.REDSTONE_MODE,
@@ -132,7 +135,7 @@ public class PatternGridContainerMenu extends AbstractGridContainerMenu {
             grid::setRedstoneMode
         ));
         registerProperty(new ServerProperty<>(
-            PatternGridPropertyTypes.PATTERN_TYPE,
+            PropertyTypes.WORKSTATION_TYPE,
             grid::getPatternType,
             grid::setPatternType
         ));
@@ -152,12 +155,12 @@ public class PatternGridContainerMenu extends AbstractGridContainerMenu {
         this.listener = listener;
     }
 
-    PatternType getPatternType() {
-        return getProperty(PatternGridPropertyTypes.PATTERN_TYPE).getValue();
+    String getPatternType() {
+        return getProperty(PropertyTypes.WORKSTATION_TYPE).getValue();
     }
 
-    void setPatternType(final PatternType patternType) {
-        getProperty(PatternGridPropertyTypes.PATTERN_TYPE).setValue(patternType);
+    void setPatternType(final String patternType) {
+        getProperty(PropertyTypes.WORKSTATION_TYPE).setValue(patternType);
     }
 
     boolean isFuzzyMode() {
@@ -179,7 +182,8 @@ public class PatternGridContainerMenu extends AbstractGridContainerMenu {
     public void resized(final int playerInventoryY, final int topYStart, final int topYEnd) {
         super.resized(playerInventoryY, topYStart, topYEnd);
         transferManager.clear();
-        activeTab.matrix.addMatrixSlots(playerInventoryY);
+        addPatternSlots(playerInventoryY);
+        activeTab.getMatrix().addMatrixSlots(this, playerInventoryY);
     }
 
     int getFirstSmithingTableSlotIndex() {
@@ -227,11 +231,11 @@ public class PatternGridContainerMenu extends AbstractGridContainerMenu {
     @Nullable
     @Override
     protected ResourceKey getResourceForAutocraftableHint(final Slot slot) {
-        final boolean isInputItem = slot.container == craftingMatrix
+        final boolean isInputItem = /*slot.container == craftingMatrix
             || slot.container == stonecutterInput
-            || slot.container == smithingTableMatrix;
-        final boolean isResultItem = slot.container == craftingResult
-            || slot.container == smithingTableResult;
+            ||*/ slot.container == smithingTableMatrix;
+        final boolean isResultItem = /*slot.container == craftingResult
+            ||*/ slot.container == smithingTableResult;
         if (isInputItem || isResultItem) {
             return ItemResource.ofItemStack(slot.getItem());
         } else if (slot instanceof ProcessingMatrixResourceSlot processingMatrixSlot) {
@@ -276,44 +280,34 @@ public class PatternGridContainerMenu extends AbstractGridContainerMenu {
         }
     }
 
-    private void addStonecutterSlots(final int playerInventoryY) {
-        final int slotY = playerInventoryY - Y_OFFSET_BETWEEN_PLAYER_INVENTORY_AND_STONECUTTER_SLOT;
-        addSlot(new FilterSlot(stonecutterInput, 0, 13, slotY) {
-            @Override
-            public boolean isActive() {
-                return getPatternType() == PatternType.STONECUTTER;
-            }
-        });
-    }
-
-    private void addSmithingTableSlots(final int playerInventoryY) {
-        final int y = playerInventoryY - Y_OFFSET_BETWEEN_PLAYER_INVENTORY_AND_SMITHING_TABLE_SLOTS;
-        for (int i = 0; i < 3; ++i) {
-            final int ii = i;
-            addSlot(new FilterSlot(smithingTableMatrix, i, 13 + (i * 18), y) {
-                @Override
-                public boolean isActive() {
-                    return getPatternType() == PatternType.SMITHING_TABLE;
-                }
-
-                @Override
-                public boolean mayPlace(final ItemStack stack) {
-                    return smithingTableRecipes.stream().anyMatch(recipe -> switch (ii) {
-                        case 0 -> recipe.value().isTemplateIngredient(stack);
-                        case 1 -> recipe.value().isBaseIngredient(stack);
-                        case 2 -> recipe.value().isAdditionIngredient(stack);
-                        default -> false;
-                    });
-                }
-            });
-        }
-        addSlot(new DisabledSlot(smithingTableResult, 0, 93, y) {
-            @Override
-            public boolean isActive() {
-                return getPatternType() == PatternType.SMITHING_TABLE;
-            }
-        });
-    }
+//    private void addSmithingTableSlots(final int playerInventoryY) {
+//        final int y = playerInventoryY - Y_OFFSET_BETWEEN_PLAYER_INVENTORY_AND_SMITHING_TABLE_SLOTS;
+//        for (int i = 0; i < 3; ++i) {
+//            final int ii = i;
+//            addSlot(new FilterSlot(smithingTableMatrix, i, 13 + (i * 18), y) {
+//                @Override
+//                public boolean isActive() {
+//                    return getPatternType() == PatternType.SMITHING_TABLE;
+//                }
+//
+//                @Override
+//                public boolean mayPlace(final ItemStack stack) {
+//                    return smithingTableRecipes.stream().anyMatch(recipe -> switch (ii) {
+//                        case 0 -> recipe.value().isTemplateIngredient(stack);
+//                        case 1 -> recipe.value().isBaseIngredient(stack);
+//                        case 2 -> recipe.value().isAdditionIngredient(stack);
+//                        default -> false;
+//                    });
+//                }
+//            });
+//        }
+//        addSlot(new DisabledSlot(smithingTableResult, 0, 93, y) {
+//            @Override
+//            public boolean isActive() {
+//                return getPatternType() == PatternType.SMITHING_TABLE;
+//            }
+//        });
+//    }
 
     Optional<SmithingTemplateItem> getSmithingTableTemplateItem() {
         final ItemStack stack = getSlot(getFirstSmithingTableSlotIndex()).getItem();
@@ -324,18 +318,6 @@ public class PatternGridContainerMenu extends AbstractGridContainerMenu {
             }
         }
         return Optional.empty();
-    }
-
-    List<RecipeHolder<StonecutterRecipe>> getStonecutterRecipes() {
-        return stonecutterInput.getRecipes();
-    }
-
-    int getStonecutterSelectedRecipe() {
-        return getProperty(PatternGridPropertyTypes.STONECUTTER_SELECTED_RECIPE).getValue();
-    }
-
-    void setStonecutterSelectedRecipe(final int idx) {
-        getProperty(PatternGridPropertyTypes.STONECUTTER_SELECTED_RECIPE).setValue(idx);
     }
 
     ItemStack getSmithingTableResult() {
@@ -354,23 +336,12 @@ public class PatternGridContainerMenu extends AbstractGridContainerMenu {
 
     public void createPattern() {
         if (patternGrid != null) {
-            patternGrid.createPattern();
+            //patternGrid.createPattern();
         }
     }
 
     void sendCreatePattern() {
         C2SPackets.sendPatternGridCreatePattern();
-    }
-
-    @API(status = API.Status.INTERNAL)
-    public void transferCraftingRecipe(final List<List<ItemResource>> recipe) {
-        if (patternGrid == null) {
-            C2SPackets.sendPatternGridCraftingRecipeTransfer(recipe);
-            return;
-        }
-        if (player != null) {
-            patternGrid.transferCraftingRecipe(player, recipe);
-        }
     }
 
     @API(status = API.Status.INTERNAL)
@@ -394,16 +365,27 @@ public class PatternGridContainerMenu extends AbstractGridContainerMenu {
         patternGrid.transferStonecutterRecipe(input, selectedOutput);
     }
 
+//    @API(status = API.Status.INTERNAL)
+//    public void transferSmithingTableRecipe(final List<ItemResource> templates,
+//                                            final List<ItemResource> bases,
+//                                            final List<ItemResource> additions) {
+//        if (patternGrid == null) {
+//            C2SPackets.sendPatternGridSmithingTableRecipeTransfer(templates, bases, additions);
+//            return;
+//        }
+//        if (player != null) {
+//            patternGrid.transferSmithingTableRecipe(player, templates, bases, additions);
+//        }
+//    }
+
     @API(status = API.Status.INTERNAL)
-    public void transferSmithingTableRecipe(final List<ItemResource> templates,
-                                            final List<ItemResource> bases,
-                                            final List<ItemResource> additions) {
+    public void transferCraftingRecipe(final List<List<ItemResource>> recipe) {
         if (patternGrid == null) {
-            C2SPackets.sendPatternGridSmithingTableRecipeTransfer(templates, bases, additions);
+            C2SPackets.sendPatternGridCraftingRecipeTransfer(recipe);
             return;
         }
         if (player != null) {
-            patternGrid.transferSmithingTableRecipe(player, templates, bases, additions);
+            patternGrid.transferCraftingRecipe(player, recipe);
         }
     }
 
@@ -416,7 +398,7 @@ public class PatternGridContainerMenu extends AbstractGridContainerMenu {
     }
 
     interface PatternGridListener {
-        void patternTypeChanged(PatternType newPatternType);
+        void patternTypeChanged(String newPatternType);
 
         void fuzzyModeChanged(boolean newFuzzyMode);
     }

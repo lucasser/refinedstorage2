@@ -13,7 +13,7 @@ class PatternTypeSettings {
         return switch (patternType) {
             case PROCESSING -> PatternType.PROCESSING;
             case STONECUTTER -> PatternType.STONECUTTER;
-            case SMITHING_TABLE -> PatternType.SMITHING_TABLE;
+            //case SMITHING_TABLE -> PatternType.SMITHING_TABLE;
             default -> PatternType.CRAFTING;
         };
     }
@@ -23,7 +23,7 @@ class PatternTypeSettings {
             case CRAFTING -> CRAFTING;
             case PROCESSING -> PROCESSING;
             case STONECUTTER -> STONECUTTER;
-            case SMITHING_TABLE -> SMITHING_TABLE;
+            //case SMITHING_TABLE -> SMITHING_TABLE;
         };
     }
 }

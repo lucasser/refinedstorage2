@@ -78,7 +78,7 @@ public abstract class AbstractResourceContainerMenu extends AbstractBaseContaine
     }
 
     @Override
-    protected Slot addSlot(final Slot slot) {
+    public Slot addSlot(final Slot slot) {
         if (slot instanceof ResourceSlot resourceSlot) {
             resourceSlots.add(resourceSlot);
         }

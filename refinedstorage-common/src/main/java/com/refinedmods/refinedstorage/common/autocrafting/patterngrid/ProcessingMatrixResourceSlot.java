@@ -36,7 +36,7 @@ class ProcessingMatrixResourceSlot extends ResourceSlot {
         "pattern_grid.processing.output_slots_help"
     );
 
-    private final Supplier<PatternType> patternTypeSupplier;
+    private final Supplier<String> patternTypeSupplier;
     private final boolean input;
     private final int startY;
     private final int endY;
@@ -48,7 +48,7 @@ class ProcessingMatrixResourceSlot extends ResourceSlot {
                                  final int x,
                                  final int y,
                                  final boolean input,
-                                 final Supplier<PatternType> patternTypeSupplier,
+                                 final Supplier<String> patternTypeSupplier,
                                  final Pair<Integer, Integer> startEndY) {
         super(resourceContainer, index, input ? INPUT_HELP : OUTPUT_HELP, x, y, ResourceSlotType.FILTER_WITH_AMOUNT);
         this.patternTypeSupplier = patternTypeSupplier;
@@ -99,8 +99,7 @@ class ProcessingMatrixResourceSlot extends ResourceSlot {
 
     @Override
     public boolean isActive() {
-        final PatternType patternType = patternTypeSupplier.get();
-        return patternType == PatternType.PROCESSING && y >= startY && y < endY;
+        return y >= startY && y < endY && patternTypeSupplier.get().equals("minecraft:processing");
     }
 
     @Override

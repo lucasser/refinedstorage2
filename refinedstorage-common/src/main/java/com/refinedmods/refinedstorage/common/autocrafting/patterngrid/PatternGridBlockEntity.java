@@ -21,6 +21,7 @@ import com.refinedmods.refinedstorage.common.content.Items;
 import com.refinedmods.refinedstorage.common.grid.AbstractGridBlockEntity;
 import com.refinedmods.refinedstorage.common.grid.AbstractGridContainerMenu;
 import com.refinedmods.refinedstorage.common.grid.GridData;
+import com.refinedmods.refinedstorage.common.grid.crafting.helpers.StonecutterInputContainer;
 import com.refinedmods.refinedstorage.common.support.BlockEntityWithDrops;
 import com.refinedmods.refinedstorage.common.support.FilteredContainer;
 import com.refinedmods.refinedstorage.common.support.RecipeMatrix;
@@ -91,7 +92,7 @@ public class PatternGridBlockEntity extends AbstractGridBlockEntity implements B
     );
 
     private boolean fuzzyMode;
-    private PatternType patternType = PatternType.CRAFTING;
+    private String patternType = PatternType.CRAFTING.name();
 
     public PatternGridBlockEntity(final BlockPos pos, final BlockState state) {
         super(
@@ -158,7 +159,7 @@ public class PatternGridBlockEntity extends AbstractGridBlockEntity implements B
         tag.put(TAG_PATTERN_INPUT, ContainerUtil.write(patternInput, provider));
         tag.put(TAG_PATTERN_OUTPUT, ContainerUtil.write(patternOutput, provider));
         tag.putBoolean(TAG_FUZZY_MODE, fuzzyMode);
-        tag.putInt(TAG_PATTERN_TYPE, PatternTypeSettings.getPatternType(patternType));
+        tag.putString(TAG_PATTERN_TYPE, patternType);
         tag.put(TAG_PROCESSING_INPUT, processingInput.toTag(provider));
         tag.put(TAG_PROCESSING_OUTPUT, processingOutput.toTag(provider));
         tag.put(TAG_STONECUTTER_INPUT, ContainerUtil.write(stonecutterInput, provider));
@@ -177,7 +178,7 @@ public class PatternGridBlockEntity extends AbstractGridBlockEntity implements B
             ContainerUtil.read(tag.getCompound(TAG_PATTERN_OUTPUT), patternOutput, provider);
         }
         fuzzyMode = tag.getBoolean(TAG_FUZZY_MODE);
-        patternType = PatternTypeSettings.getPatternType(tag.getInt(TAG_PATTERN_TYPE));
+        patternType = tag.getString(TAG_PATTERN_TYPE);
         if (tag.contains(TAG_PROCESSING_INPUT)) {
             processingInput.fromTag(tag.getCompound(TAG_PROCESSING_INPUT), provider);
         }
@@ -208,7 +209,7 @@ public class PatternGridBlockEntity extends AbstractGridBlockEntity implements B
         return fuzzyMode;
     }
 
-    PatternType getPatternType() {
+    String getPatternType() {
         return patternType;
     }
 
@@ -217,7 +218,7 @@ public class PatternGridBlockEntity extends AbstractGridBlockEntity implements B
         setChanged();
     }
 
-    void setPatternType(final PatternType patternType) {
+    void setPatternType(final String patternType) {
         this.patternType = patternType;
         setChanged();
     }
@@ -261,12 +262,13 @@ public class PatternGridBlockEntity extends AbstractGridBlockEntity implements B
         if (level == null) {
             return;
         }
-        switch (patternType) {
-            case CRAFTING -> craftingRecipe.clear(level);
-            case PROCESSING -> clearProcessing();
-            case STONECUTTER -> stonecutterInput.clearContent();
-            case SMITHING_TABLE -> smithingTableRecipe.clear(level);
-        }
+
+//        switch (patternType) {
+//            case CRAFTING -> craftingRecipe.clear(level);
+//            case PROCESSING -> clearProcessing();
+//            case STONECUTTER -> stonecutterInput.clearContent();
+//            //case SMITHING_TABLE -> smithingTableRecipe.clear(level);
+//        }
         setChanged();
     }
 
@@ -275,24 +277,24 @@ public class PatternGridBlockEntity extends AbstractGridBlockEntity implements B
         processingOutput.clear();
     }
 
-    void createPattern() {
-        if (level == null || !isPatternAvailable()) {
-            return;
-        }
-        final ItemStack result = switch (patternType) {
-            case CRAFTING -> createCraftingPattern();
-            case PROCESSING -> createProcessingPattern();
-            case STONECUTTER -> createStonecutterPattern();
-            case SMITHING_TABLE -> createSmithingTablePattern();
-        };
-        if (result != null) {
-            final boolean shouldExtractInputPattern = patternOutput.getItem(0).isEmpty();
-            if (shouldExtractInputPattern) {
-                patternInput.removeItem(0, 1);
-            }
-            patternOutput.setItem(0, result);
-        }
-    }
+//    void createPattern() {
+//        if (level == null || !isPatternAvailable()) {
+//            return;
+//        }
+//        final ItemStack result = switch (patternType) {
+//            case CRAFTING -> createCraftingPattern();
+//            case PROCESSING -> createProcessingPattern();
+//            case STONECUTTER -> createStonecutterPattern();
+//            //case SMITHING_TABLE -> createSmithingTablePattern();
+//        };
+//        if (result != null) {
+//            final boolean shouldExtractInputPattern = patternOutput.getItem(0).isEmpty();
+//            if (shouldExtractInputPattern) {
+//                patternInput.removeItem(0, 1);
+//            }
+//            patternOutput.setItem(0, result);
+//        }
+//    }
 
     @Nullable
     private ItemStack createCraftingPattern() {
@@ -357,20 +359,20 @@ public class PatternGridBlockEntity extends AbstractGridBlockEntity implements B
         return result;
     }
 
-    @Nullable
-    private ItemStack createSmithingTablePattern() {
-        if (!smithingTableRecipe.hasResult()) {
-            return null;
-        }
-        final ItemStack result = createPatternStack(PatternType.SMITHING_TABLE);
-        final SmithingTablePatternState state = new SmithingTablePatternState(
-            ItemResource.ofItemStack(smithingTableRecipe.getMatrix().getItem(0)),
-            ItemResource.ofItemStack(smithingTableRecipe.getMatrix().getItem(1)),
-            ItemResource.ofItemStack(smithingTableRecipe.getMatrix().getItem(2))
-        );
-        result.set(DataComponents.INSTANCE.getSmithingTablePatternState(), state);
-        return result;
-    }
+//    @Nullable
+//    private ItemStack createSmithingTablePattern() {
+//        if (!smithingTableRecipe.hasResult()) {
+//            return null;
+//        }
+//        final ItemStack result = createPatternStack(PatternType.SMITHING_TABLE);
+//        final SmithingTablePatternState state = new SmithingTablePatternState(
+//            ItemResource.ofItemStack(smithingTableRecipe.getMatrix().getItem(0)),
+//            ItemResource.ofItemStack(smithingTableRecipe.getMatrix().getItem(1)),
+//            ItemResource.ofItemStack(smithingTableRecipe.getMatrix().getItem(2))
+//        );
+//        result.set(DataComponents.INSTANCE.getSmithingTablePatternState(), state);
+//        return result;
+//    }
 
     public static ItemStack createPatternStack(final PatternType patternType) {
         final ItemStack result = new ItemStack(Items.INSTANCE.getPattern());
@@ -384,7 +386,7 @@ public class PatternGridBlockEntity extends AbstractGridBlockEntity implements B
         if (patternState == null) {
             return;
         }
-        this.patternType = patternState.type();
+        this.patternType = patternState.type().name();
         switch (patternState.type()) {
             case CRAFTING -> {
                 final CraftingPatternState state = stack.get(DataComponents.INSTANCE.getCraftingPatternState());
@@ -404,14 +406,14 @@ public class PatternGridBlockEntity extends AbstractGridBlockEntity implements B
                     copyStonecutterPattern(state);
                 }
             }
-            case SMITHING_TABLE -> {
-                final SmithingTablePatternState state = stack.get(
-                    DataComponents.INSTANCE.getSmithingTablePatternState()
-                );
-                if (state != null) {
-                    copySmithingTablePattern(state);
-                }
-            }
+//            case SMITHING_TABLE -> {
+//                final SmithingTablePatternState state = stack.get(
+//                    DataComponents.INSTANCE.getSmithingTablePatternState()
+//                );
+//                if (state != null) {
+//                    copySmithingTablePattern(state);
+//                }
+//            }
         }
         setChanged();
     }
@@ -494,6 +496,73 @@ public class PatternGridBlockEntity extends AbstractGridBlockEntity implements B
         return !patternInput.getItem(0).isEmpty() || !patternOutput.getItem(0).isEmpty();
     }
 
+    void transferProcessingRecipe(final Player player,
+                                  final List<List<ResourceAmount>> inputs,
+                                  final List<List<ResourceAmount>> outputs) {
+        final Comparator<ResourceAmount> sorter = ResourceSorters.create(
+            mainNetworkNode.getNetwork() != null
+                ? mainNetworkNode.getNetwork().getComponent(StorageNetworkComponent.class)
+                : null,
+            mainNetworkNode.getNetwork() != null
+                ? mainNetworkNode.getNetwork().getComponent(AutocraftingNetworkComponent.class).getPatterns()
+                : Collections.emptySet(),
+            player.getInventory(),
+            ResourceAmount::resource
+        );
+        getProcessingInput().clear();
+        transferProcessingRecipe(inputs, getProcessingInput(), sorter);
+        getProcessingOutput().clear();
+        transferProcessingRecipe(outputs, getProcessingOutput(), sorter);
+        setPatternType("minecraft:processing");
+    }
+
+    private void transferProcessingRecipe(final List<List<ResourceAmount>> recipe,
+                                          final ResourceContainer container,
+                                          final Comparator<ResourceAmount> sorter) {
+        for (int i = 0; i < container.size(); ++i) {
+            if (i >= recipe.size()) {
+                break;
+            }
+            final List<ResourceAmount> possibilities = recipe.get(i);
+            if (!possibilities.isEmpty()) {
+                possibilities.sort(sorter);
+                container.set(i, possibilities.getFirst());
+            }
+        }
+    }
+
+    void transferStonecutterRecipe(final ItemResource input, final ItemResource selectedOutput) {
+        setStonecutterInputAndSelectedRecipe(input.toItemStack(), selectedOutput.toItemStack());
+        setPatternType("minecraft:stonecutter");
+    }
+
+//    void transferSmithingTableRecipe(final Player player,
+//                                     final List<ItemResource> templates,
+//                                     final List<ItemResource> bases,
+//                                     final List<ItemResource> additions) {
+//        if (templates.isEmpty() || bases.isEmpty() || additions.isEmpty()) {
+//            return;
+//        }
+//        final Comparator<ItemResource> sorter = ResourceSorters.create(
+//            mainNetworkNode.getNetwork() != null
+//                ? mainNetworkNode.getNetwork().getComponent(StorageNetworkComponent.class)
+//                : null,
+//            mainNetworkNode.getNetwork() != null
+//                ? mainNetworkNode.getNetwork().getComponent(AutocraftingNetworkComponent.class).getPatterns()
+//                : Collections.emptySet(),
+//            player.getInventory(),
+//            r -> r
+//        );
+//        templates.sort(sorter);
+//        bases.sort(sorter);
+//        additions.sort(sorter);
+//        final ItemResource template = templates.getFirst();
+//        final ItemResource base = bases.getFirst();
+//        final ItemResource addition = additions.getFirst();
+//        setSmithingTableInput(template.toItemStack(), base.toItemStack(), addition.toItemStack());
+//        setPatternType(PatternType.SMITHING_TABLE);
+//    }
+
     void transferCraftingRecipe(final Player player, final List<List<ItemResource>> recipe) {
         final Comparator<ResourceKey> sorter = ResourceSorters.create(
             mainNetworkNode.getNetwork() != null
@@ -516,74 +585,7 @@ public class PatternGridBlockEntity extends AbstractGridBlockEntity implements B
                 getCraftingMatrix().setItem(i, possibilities.getFirst().toItemStack());
             }
         }
-        setPatternType(PatternType.CRAFTING);
-    }
-
-    void transferProcessingRecipe(final Player player,
-                                  final List<List<ResourceAmount>> inputs,
-                                  final List<List<ResourceAmount>> outputs) {
-        final Comparator<ResourceAmount> sorter = ResourceSorters.create(
-            mainNetworkNode.getNetwork() != null
-                ? mainNetworkNode.getNetwork().getComponent(StorageNetworkComponent.class)
-                : null,
-            mainNetworkNode.getNetwork() != null
-                ? mainNetworkNode.getNetwork().getComponent(AutocraftingNetworkComponent.class).getPatterns()
-                : Collections.emptySet(),
-            player.getInventory(),
-            ResourceAmount::resource
-        );
-        getProcessingInput().clear();
-        transferProcessingRecipe(inputs, getProcessingInput(), sorter);
-        getProcessingOutput().clear();
-        transferProcessingRecipe(outputs, getProcessingOutput(), sorter);
-        setPatternType(PatternType.PROCESSING);
-    }
-
-    private void transferProcessingRecipe(final List<List<ResourceAmount>> recipe,
-                                          final ResourceContainer container,
-                                          final Comparator<ResourceAmount> sorter) {
-        for (int i = 0; i < container.size(); ++i) {
-            if (i >= recipe.size()) {
-                break;
-            }
-            final List<ResourceAmount> possibilities = recipe.get(i);
-            if (!possibilities.isEmpty()) {
-                possibilities.sort(sorter);
-                container.set(i, possibilities.getFirst());
-            }
-        }
-    }
-
-    void transferStonecutterRecipe(final ItemResource input, final ItemResource selectedOutput) {
-        setStonecutterInputAndSelectedRecipe(input.toItemStack(), selectedOutput.toItemStack());
-        setPatternType(PatternType.STONECUTTER);
-    }
-
-    void transferSmithingTableRecipe(final Player player,
-                                     final List<ItemResource> templates,
-                                     final List<ItemResource> bases,
-                                     final List<ItemResource> additions) {
-        if (templates.isEmpty() || bases.isEmpty() || additions.isEmpty()) {
-            return;
-        }
-        final Comparator<ItemResource> sorter = ResourceSorters.create(
-            mainNetworkNode.getNetwork() != null
-                ? mainNetworkNode.getNetwork().getComponent(StorageNetworkComponent.class)
-                : null,
-            mainNetworkNode.getNetwork() != null
-                ? mainNetworkNode.getNetwork().getComponent(AutocraftingNetworkComponent.class).getPatterns()
-                : Collections.emptySet(),
-            player.getInventory(),
-            r -> r
-        );
-        templates.sort(sorter);
-        bases.sort(sorter);
-        additions.sort(sorter);
-        final ItemResource template = templates.getFirst();
-        final ItemResource base = bases.getFirst();
-        final ItemResource addition = additions.getFirst();
-        setSmithingTableInput(template.toItemStack(), base.toItemStack(), addition.toItemStack());
-        setPatternType(PatternType.SMITHING_TABLE);
+        setPatternType("minecraft:crafting");
     }
 
     static boolean isValidPattern(final ItemStack stack) {

@@ -16,8 +16,8 @@ public record PatternGridClearPacket() implements CustomPacketPayload {
         StreamCodec.unit(INSTANCE);
 
     public static void handle(final PacketContext ctx) {
-        if (ctx.getPlayer().containerMenu instanceof PatternGridContainerMenu patternGridContainerMenu) {
-            patternGridContainerMenu.clear();
+        if (ctx.getPlayer().containerMenu instanceof PatternGridContainerMenu craftingGridMenu) {
+            craftingGridMenu.clear();
         }
     }
 

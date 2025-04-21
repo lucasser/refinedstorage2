@@ -96,12 +96,12 @@ final class AutocrafterTestPlots {
         return pattern;
     }
 
-    static ItemStack createSmithingTablePattern(final ItemResource template,
-                                                final ItemResource base,
-                                                final ItemResource addition) {
-        final ItemStack pattern = PatternGridBlockEntity.createPatternStack(PatternType.SMITHING_TABLE);
-        pattern.set(DataComponents.INSTANCE.getSmithingTablePatternState(),
-            new SmithingTablePatternState(template, base, addition));
-        return pattern;
-    }
+//    static ItemStack createSmithingTablePattern(final ItemResource template,
+//                                                final ItemResource base,
+//                                                final ItemResource addition) {
+//        final ItemStack pattern = PatternGridBlockEntity.createPatternStack(PatternType.SMITHING_TABLE);
+//        pattern.set(DataComponents.INSTANCE.getSmithingTablePatternState(),
+//            new SmithingTablePatternState(template, base, addition));
+//        return pattern;
+//    }
 }

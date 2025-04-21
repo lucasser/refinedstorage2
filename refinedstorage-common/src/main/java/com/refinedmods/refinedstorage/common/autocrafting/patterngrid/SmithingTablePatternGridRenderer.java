@@ -1,6 +1,7 @@
 package com.refinedmods.refinedstorage.common.autocrafting.patterngrid;
 
 import com.refinedmods.refinedstorage.common.autocrafting.VanillaConstants;
+import com.refinedmods.refinedstorage.common.api.grid.workstations.MatrixRenderer;
 import com.refinedmods.refinedstorage.common.util.ClientPlatformUtil;
 
 import java.util.List;
@@ -29,7 +30,7 @@ import static com.refinedmods.refinedstorage.common.autocrafting.patterngrid.Pat
 import static com.refinedmods.refinedstorage.common.autocrafting.patterngrid.PatternGridScreen.INSET_WIDTH;
 import static com.refinedmods.refinedstorage.common.util.IdentifierUtil.createIdentifier;
 
-class SmithingTablePatternGridRenderer implements PatternGridRenderer {
+class SmithingTablePatternGridRenderer implements MatrixRenderer {
     private static final ResourceLocation SPRITE = createIdentifier("pattern_grid/smithing_table");
 
     private final PatternGridContainerMenu menu;

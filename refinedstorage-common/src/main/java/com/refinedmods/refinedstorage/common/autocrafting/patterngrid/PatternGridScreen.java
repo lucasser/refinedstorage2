@@ -2,8 +2,12 @@ package com.refinedmods.refinedstorage.common.autocrafting.patterngrid;
 
 import com.refinedmods.refinedstorage.common.api.autocrafting.PatternOutputRenderingScreen;
 import com.refinedmods.refinedstorage.common.api.support.resource.PlatformResourceKey;
+import com.refinedmods.refinedstorage.common.grid.crafting.WorkstationMenuRegistry;
+import com.refinedmods.refinedstorage.common.api.grid.workstations.MatrixRenderer;
 import com.refinedmods.refinedstorage.common.grid.screen.AbstractGridScreen;
 import com.refinedmods.refinedstorage.common.support.containermenu.ResourceSlot;
+import com.refinedmods.refinedstorage.common.support.widget.CheckboxWidget;
+import com.refinedmods.refinedstorage.common.support.widget.HoveredImageButton;
 import com.refinedmods.refinedstorage.common.support.widget.CustomButton;
 
 import java.util.EnumMap;
@@ -14,6 +18,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
@@ -53,19 +58,27 @@ public class PatternGridScreen extends AbstractGridScreen<PatternGridContainerMe
         createIdentifier("widget/clear_focused"),
         createIdentifier("widget/clear_disabled")
     );
+    private static final MutableComponent FUZZY_MODE = createTranslation("gui", "pattern_grid.fuzzy_mode");
+    private static final MutableComponent FUZZY_MODE_ON_HELP =
+        createTranslation("gui", "pattern_grid.fuzzy_mode.on.help");
+    private static final MutableComponent FUZZY_MODE_OFF_HELP =
+        createTranslation("gui", "pattern_grid.fuzzy_mode.off.help");
+
+    @Nullable
+    private CheckboxWidget fuzzyModeCheckbox;
 
     @Nullable
     private Button createPatternButton;
     @Nullable
     private Button clearButton;
     @Nullable
-    private PatternGridRenderer renderer;
+    private MatrixRenderer renderer;
 
-    private final Map<PatternType, PatternTypeButton> patternTypeButtons = new EnumMap<>(PatternType.class);
+    private final Map<String, PatternTypeButton> patternTypeButtons = new HashMap<>();
     private final Inventory playerInventory;
     private final Map<Pair<PlatformResourceKey, Set<ResourceLocation>>, ProcessingMatrixInputClientTooltipComponent>
         processingMatrixInputTooltipCache = new HashMap<>();
-    private final Map<PatternType, PatternGridRenderer> renderers = new EnumMap<>(PatternType.class);
+    private final Map<PatternType, MatrixRenderer> renderers = new EnumMap<>(PatternType.class);
 
     public PatternGridScreen(final PatternGridContainerMenu menu, final Inventory inventory, final Component title) {
         super(menu, inventory, title, 177);
@@ -78,7 +91,7 @@ public class PatternGridScreen extends AbstractGridScreen<PatternGridContainerMe
     @Override
     protected void init() {
         super.init();
-        initRenderers();
+        //initRenderers();
         this.createPatternButton = createCreatePatternButton(leftPos + 152, topPos + imageHeight - bottomHeight + 32);
         addRenderableWidget(createPatternButton);
         addPatternTypeButtons(getMenu().getPatternType());
@@ -87,22 +100,22 @@ public class PatternGridScreen extends AbstractGridScreen<PatternGridContainerMe
         menu.setListener(this);
     }
 
-    private void initRenderers() {
-        for (final PatternType type : PatternType.values()) {
-            final PatternGridRenderer typeRenderer = type.createRenderer(
-                menu,
-                leftPos,
-                topPos,
-                getInsetX(),
-                getInsetY()
-            );
-            if (type == getMenu().getPatternType()) {
-                this.renderer = typeRenderer;
-            }
-            typeRenderer.addWidgets(this::addWidget, this::addRenderableWidget);
-            renderers.put(type, typeRenderer);
-        }
-    }
+//    private void initRenderers() {
+//        for (final PatternType type : PatternType.values()) {
+//            final MatrixRenderer typeRenderer = type.createRenderer(
+//                menu,
+//                leftPos,
+//                topPos,
+//                getInsetX(),
+//                getInsetY()
+//            );
+//            if (type == getMenu().getPatternType()) {
+//                this.renderer = typeRenderer;
+//            }
+//            typeRenderer.addWidgets(this::addWidget, this::addRenderableWidget);
+//            renderers.put(type, typeRenderer);
+//        }
+//    }
 
     private CustomButton createCreatePatternButton(final int x, final int y) {
         final CustomButton button = new CustomButton(
@@ -119,18 +132,18 @@ public class PatternGridScreen extends AbstractGridScreen<PatternGridContainerMe
         return button;
     }
 
-    private void addPatternTypeButtons(final PatternType currentPatternType) {
-        final PatternType[] patternTypes = PatternType.values();
+    private void addPatternTypeButtons(final String currentPatternType) {
+        final WorkstationMenuRegistry.WorkstationRegistryElement[] patternTypes = WorkstationMenuRegistry.REGISTRY.values().toArray(new WorkstationMenuRegistry.WorkstationRegistryElement[0]);
         for (int i = 0; i < patternTypes.length; ++i) {
-            final PatternType patternType = patternTypes[i];
+            final WorkstationMenuRegistry.WorkstationRegistryElement patternType = patternTypes[i];
             final PatternTypeButton button = new PatternTypeButton(
                 leftPos + 172,
                 topPos + imageHeight - bottomHeight + 4 + (i * (16 + 3)),
-                btn -> getMenu().setPatternType(patternType),
+                btn -> getMenu().setPatternType(patternType.workstationName),
                 patternType,
-                patternType == currentPatternType
+                patternType.workstationName.equals(currentPatternType)
             );
-            patternTypeButtons.put(patternType, button);
+            patternTypeButtons.put(patternType.workstationName, button);
             addRenderableWidget(button);
         }
     }
@@ -273,14 +286,14 @@ public class PatternGridScreen extends AbstractGridScreen<PatternGridContainerMe
     }
 
     @Override
-    public void patternTypeChanged(final PatternType newPatternType) {
+    public void patternTypeChanged(final String newPatternType) {
         patternTypeButtons.values().forEach(button -> button.setSelected(false));
         patternTypeButtons.get(newPatternType).setSelected(true);
         if (renderer != null) {
-            renderer.patternTypeChanged(newPatternType);
+            renderer.workstationChanged(newPatternType);
         }
         this.renderer = requireNonNull(renderers.get(newPatternType));
-        this.renderer.patternTypeChanged(newPatternType);
+        this.renderer.workstationChanged(newPatternType);
         if (clearButton != null) {
             clearButton.setPosition(renderer.getClearButtonX(), renderer.getClearButtonY());
         }
@@ -288,9 +301,9 @@ public class PatternGridScreen extends AbstractGridScreen<PatternGridContainerMe
 
     @Override
     public void fuzzyModeChanged(final boolean newFuzzyMode) {
-        if (renderer != null) {
-            renderer.fuzzyModeChanged(newFuzzyMode);
-        }
+//        if (renderer != null) {
+//            renderer.fuzzyModeChanged(newFuzzyMode);
+//        }
     }
 
     private int getInsetX() {
@@ -299,6 +312,29 @@ public class PatternGridScreen extends AbstractGridScreen<PatternGridContainerMe
 
     private int getInsetY() {
         return topPos + imageHeight - bottomHeight + 5;
+    }
+
+    private CheckboxWidget createFuzzyModeCheckbox() {
+        final CheckboxWidget checkbox = new CheckboxWidget(
+            getInsetX() + INSET_PADDING,
+            getInsetY() + INSET_PADDING + 54 + INSET_PADDING - 2,
+            FUZZY_MODE,
+            Minecraft.getInstance().font,
+            menu.isFuzzyMode(),
+            CheckboxWidget.Size.SMALL
+        );
+        checkbox.setOnPressed((c, selected) -> menu.setFuzzyMode(selected));
+        checkbox.setHelpTooltip(getFuzzyModeTooltip(menu.isFuzzyMode()));
+        checkbox.visible = isFuzzyModeCheckboxVisible();
+        return checkbox;
+    }
+
+    private static Component getFuzzyModeTooltip(final boolean fuzzyMode) {
+        return fuzzyMode ? FUZZY_MODE_ON_HELP : FUZZY_MODE_OFF_HELP;
+    }
+
+    private boolean isFuzzyModeCheckboxVisible() {
+        return menu.getPatternType().equals("minecraft:crafting");
     }
 
     @Override

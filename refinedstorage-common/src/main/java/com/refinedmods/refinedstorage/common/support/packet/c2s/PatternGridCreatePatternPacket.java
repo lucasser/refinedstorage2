@@ -17,8 +17,8 @@ public record PatternGridCreatePatternPacket() implements CustomPacketPayload {
         StreamCodec.unit(INSTANCE);
 
     public static void handle(final PacketContext ctx) {
-        if (ctx.getPlayer().containerMenu instanceof PatternGridContainerMenu patternGridContainerMenu) {
-            patternGridContainerMenu.createPattern();
+        if (ctx.getPlayer().containerMenu instanceof PatternGridContainerMenu craftingGridMenu) {
+            craftingGridMenu.createPattern();
         }
     }
 

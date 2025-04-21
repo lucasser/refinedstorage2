@@ -36,7 +36,7 @@ public record PatternGridSmithingTableRecipeTransferPacket(List<ItemResource> te
 
     public static void handle(final PatternGridSmithingTableRecipeTransferPacket packet, final PacketContext ctx) {
         if (ctx.getPlayer().containerMenu instanceof PatternGridContainerMenu menu) {
-            menu.transferSmithingTableRecipe(packet.template, packet.base, packet.addition);
+//            menu.transferSmithingTableRecipe(packet.template, packet.base, packet.addition);
         }
     }
 

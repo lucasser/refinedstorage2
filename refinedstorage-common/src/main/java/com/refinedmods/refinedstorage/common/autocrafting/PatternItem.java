@@ -117,11 +117,11 @@ public class PatternItem extends Item implements PatternProviderItem {
                     state.id(),
                     pattern
                 ));
-            case SMITHING_TABLE -> getCachedSmithingTablePattern(state, stack, level).map(
-                pattern -> new SmithingTablePatternTooltipComponent(
-                    state.id(),
-                    pattern
-                ));
+//            case SMITHING_TABLE -> getCachedSmithingTablePattern(state, stack, level).map(
+//                pattern -> new SmithingTablePatternTooltipComponent(
+//                    state.id(),
+//                    pattern
+//                ));
         };
     }
 
@@ -148,8 +148,8 @@ public class PatternItem extends Item implements PatternProviderItem {
                 .map(PatternResolver.ResolvedProcessingPattern::pattern);
             case STONECUTTER -> resolver.getStonecutterPattern(stack, level, state)
                 .map(PatternResolver.ResolvedStonecutterPattern::pattern);
-            case SMITHING_TABLE -> resolver.getSmithingTablePattern(state, stack, level)
-                .map(PatternResolver.ResolvedSmithingTablePattern::pattern);
+//            case SMITHING_TABLE -> resolver.getSmithingTablePattern(state, stack, level)
+//                .map(PatternResolver.ResolvedSmithingTablePattern::pattern);
         };
     }
 
@@ -176,9 +176,9 @@ public class PatternItem extends Item implements PatternProviderItem {
             case STONECUTTER -> getCachedStonecutterPattern(state, stack, level)
                 .map(PatternResolver.ResolvedStonecutterPattern::output)
                 .map(ItemResource::toItemStack);
-            case SMITHING_TABLE -> getCachedSmithingTablePattern(state, stack, level)
-                .map(PatternResolver.ResolvedSmithingTablePattern::output)
-                .map(ItemResource::toItemStack);
+//            case SMITHING_TABLE -> getCachedSmithingTablePattern(state, stack, level)
+//                .map(PatternResolver.ResolvedSmithingTablePattern::output)
+//                .map(ItemResource::toItemStack);
         };
     }
 

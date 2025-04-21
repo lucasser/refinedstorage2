@@ -48,7 +48,7 @@ public class PatternItemOverrides extends ItemOverrides {
             case CRAFTING -> craftingModel;
             case PROCESSING -> processingModel;
             case STONECUTTER -> stonecutterModel;
-            case SMITHING_TABLE -> smithingTableModel;
+            //case SMITHING_TABLE -> smithingTableModel;
         };
     }
 }

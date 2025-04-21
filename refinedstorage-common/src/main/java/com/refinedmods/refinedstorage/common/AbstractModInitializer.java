@@ -29,8 +29,8 @@ import com.refinedmods.refinedstorage.common.autocrafting.monitor.AutocraftingMo
 import com.refinedmods.refinedstorage.common.autocrafting.monitor.AutocraftingMonitorContainerMenu;
 import com.refinedmods.refinedstorage.common.autocrafting.monitor.AutocraftingMonitorData;
 import com.refinedmods.refinedstorage.common.autocrafting.monitor.WirelessAutocraftingMonitorContainerMenu;
-import com.refinedmods.refinedstorage.common.autocrafting.patterngrid.PatternGridBlockEntity;
 import com.refinedmods.refinedstorage.common.autocrafting.patterngrid.PatternGridContainerMenu;
+import com.refinedmods.refinedstorage.common.autocrafting.patterngrid.PatternGridBlockEntity;
 import com.refinedmods.refinedstorage.common.autocrafting.patterngrid.PatternGridData;
 import com.refinedmods.refinedstorage.common.configurationcard.ConfigurationCardItem;
 import com.refinedmods.refinedstorage.common.configurationcard.ConfigurationCardState;
@@ -74,6 +74,7 @@ import com.refinedmods.refinedstorage.common.grid.GridData;
 import com.refinedmods.refinedstorage.common.grid.PortableGridData;
 import com.refinedmods.refinedstorage.common.grid.WirelessGridContainerMenu;
 import com.refinedmods.refinedstorage.common.grid.WirelessGridData;
+import com.refinedmods.refinedstorage.common.grid.crafting.WorkstationRegistry;
 import com.refinedmods.refinedstorage.common.iface.InterfaceBlock;
 import com.refinedmods.refinedstorage.common.iface.InterfaceBlockEntity;
 import com.refinedmods.refinedstorage.common.iface.InterfaceContainerMenu;
@@ -193,6 +194,10 @@ public abstract class AbstractModInitializer {
         registerWirelessTransmitterRangeModifiers();
         registerPermissions();
         registerInventorySlotReference();
+    }
+
+    private void registerWorkstations() {
+
     }
 
     private void registerStorageTypes() {
