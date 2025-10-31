@@ -10,14 +10,25 @@ import javax.annotation.Nullable;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+
+import static com.refinedmods.refinedstorage.common.util.IdentifierUtil.createIdentifier;
 
 public abstract class AbstractStretchingScreen<T extends AbstractBaseContainerMenu & ScreenSizeListener>
     extends AbstractBaseScreen<T> {
+    /**Vertical height of grid row*/
     protected static final int ROW_SIZE = 18;
+    /**Height of screen header before the stretching*/
     protected static final int TOP_HEIGHT = 19;
 
-    private static final int INVENTORY_INCLUDING_TITLE_HEIGHT = 99;
+    private static final ResourceLocation INVENTORY_TEXTURE = createIdentifier("textures/gui/inventory.png");
+
+    private static final ResourceLocation EMPTY_INSERT =
+        createIdentifier("textures/gui/workstations/blank_insert_1.png");
+    /**Height of inventory part*/
+    private static final int INVENTORY_INCLUDING_TITLE_HEIGHT = 97;
+    /**Grid column amount*/
     private static final int COLUMNS = 9;
     private static final int MIN_ROWS = 3;
     private static final int ROW_PADDING = 3;
@@ -41,8 +52,8 @@ public abstract class AbstractStretchingScreen<T extends AbstractBaseContainerMe
     @Override
     protected void init() {
         this.visibleRows = calculateVisibleRows();
-        this.imageHeight = TOP_HEIGHT + (ROW_SIZE * visibleRows) + getBottomHeight();
-        this.inventoryLabelY = imageHeight - INVENTORY_INCLUDING_TITLE_HEIGHT + 4;
+        this.imageHeight = TOP_HEIGHT + (ROW_SIZE * visibleRows) + getInventoryHeight() + getInsertHeight();
+        this.inventoryLabelY = imageHeight - getInventoryHeight() + 4;
 
         resize();
 
@@ -68,7 +79,7 @@ public abstract class AbstractStretchingScreen<T extends AbstractBaseContainerMe
 
     protected final void resize() {
         getMenu().resized(
-            imageHeight - INVENTORY_INCLUDING_TITLE_HEIGHT + 17,
+            imageHeight - getInventoryHeight() + 16 /*Inventory Title Height*/,
             TOP_HEIGHT + 1,
             TOP_HEIGHT + 1 + (ROW_SIZE * visibleRows) - 2
         );
@@ -100,14 +111,39 @@ public abstract class AbstractStretchingScreen<T extends AbstractBaseContainerMe
     private void renderBackground(final GuiGraphics graphics, final int x, final int y) {
         graphics.blit(getTexture(), x, y, 0, 0, imageWidth, TOP_HEIGHT);
         renderStretchingBackground(graphics, x, y + TOP_HEIGHT, visibleRows);
+        renderInventory(graphics, x, y);
+        renderInsert(graphics, x, y);
+    }
+
+    private void renderInsert(final GuiGraphics graphics, final int x, final int y) {
         graphics.blit(
-            getTexture(),
+            getInsertTexture(),
             x,
             y + TOP_HEIGHT + (ROW_SIZE * visibleRows),
             0,
-            getBottomV(),
+            0,
             imageWidth,
-            getBottomHeight()
+            imageHeight
+        );
+    }
+
+    protected ResourceLocation getInsertTexture() {
+        return EMPTY_INSERT;
+    }
+
+    protected ResourceLocation getInventoryTexture() {
+        return INVENTORY_TEXTURE;
+    }
+
+    private void renderInventory(final GuiGraphics graphics, final int x, final int y) {
+        graphics.blit(
+            getInventoryTexture(),
+            x,
+            y + TOP_HEIGHT + (ROW_SIZE * visibleRows) + getInsertHeight(),
+            0,
+            0,
+            imageWidth,
+            imageHeight
         );
     }
 
@@ -173,7 +209,7 @@ public abstract class AbstractStretchingScreen<T extends AbstractBaseContainerMe
     }
 
     private int calculateVisibleRows() {
-        final int screenSpaceAvailable = height - TOP_HEIGHT - getBottomHeight();
+        final int screenSpaceAvailable = height - TOP_HEIGHT - getInventoryHeight() - getInsertHeight();
         final int maxRows = getMaxRows();
         return Math.max(MIN_ROWS, Math.min((screenSpaceAvailable / ROW_SIZE) - ROW_PADDING, maxRows));
     }
@@ -204,9 +240,17 @@ public abstract class AbstractStretchingScreen<T extends AbstractBaseContainerMe
         scrollbar.setMaxOffset(maxOffset);
     }
 
-    protected abstract int getBottomHeight();
+    /**
+     * Height between end of grid and start of inventory png.
+     *                     Should be slightly less than the pixel height of the insert for propper spacing.
+     * */
+    protected int getInsertHeight() {
+        return 0;
+    }
 
-    protected abstract int getBottomV();
+    protected int getInventoryHeight() {
+        return INVENTORY_INCLUDING_TITLE_HEIGHT;
+    }
 
     protected int getScrollPanePadding() {
         return 0;

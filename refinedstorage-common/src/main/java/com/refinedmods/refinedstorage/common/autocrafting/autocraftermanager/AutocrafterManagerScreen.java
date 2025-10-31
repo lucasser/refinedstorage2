@@ -264,16 +264,6 @@ public class AutocrafterManagerScreen extends AbstractStretchingScreen<Autocraft
     }
 
     @Override
-    protected int getBottomHeight() {
-        return 99;
-    }
-
-    @Override
-    protected int getBottomV() {
-        return 73;
-    }
-
-    @Override
     protected ResourceLocation getTexture() {
         return TEXTURE;
     }

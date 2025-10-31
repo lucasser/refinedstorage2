@@ -190,16 +190,6 @@ public abstract class AbstractSecurityCardScreen<T extends AbstractSecurityCardC
     }
 
     @Override
-    protected int getBottomHeight() {
-        return 99;
-    }
-
-    @Override
-    protected int getBottomV() {
-        return 73;
-    }
-
-    @Override
     protected ResourceLocation getTexture() {
         return TEXTURE;
     }

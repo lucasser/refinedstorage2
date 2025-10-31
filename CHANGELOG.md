@@ -7,6 +7,10 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+-   GUI screens now render in sections.
+
 ### Fixed
 
 -   Correct the torch model for detectors.

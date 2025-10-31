@@ -37,6 +37,7 @@ public class PatternGridScreen extends AbstractGridScreen<PatternGridContainerMe
     static final int INSET_HEIGHT = 71;
 
     private static final ResourceLocation TEXTURE = createIdentifier("textures/gui/pattern_grid.png");
+    private static final ResourceLocation INSERT = createIdentifier("textures/gui/pattern_grid_insert.png");
     private static final MutableComponent CREATE_PATTERN = createTranslation("gui", "pattern_grid.create_pattern");
     private static final MutableComponent CLEAR = createTranslation("gui", "pattern_grid.clear");
 
@@ -68,7 +69,7 @@ public class PatternGridScreen extends AbstractGridScreen<PatternGridContainerMe
     private final Map<PatternType, PatternGridRenderer> renderers = new EnumMap<>(PatternType.class);
 
     public PatternGridScreen(final PatternGridContainerMenu menu, final Inventory inventory, final Component title) {
-        super(menu, inventory, title, 177);
+        super(menu, inventory, title);
         this.inventoryLabelY = 153;
         this.imageWidth = 193;
         this.imageHeight = 249;
@@ -79,7 +80,10 @@ public class PatternGridScreen extends AbstractGridScreen<PatternGridContainerMe
     protected void init() {
         super.init();
         initRenderers();
-        this.createPatternButton = createCreatePatternButton(leftPos + 152, topPos + imageHeight - bottomHeight + 32);
+        this.createPatternButton = createCreatePatternButton(
+            leftPos + 152,
+            topPos + imageHeight - getInventoryHeight() - getInsertHeight() + 32
+        );
         addRenderableWidget(createPatternButton);
         addPatternTypeButtons(getMenu().getPatternType());
         this.clearButton = createClearButton();
@@ -125,7 +129,7 @@ public class PatternGridScreen extends AbstractGridScreen<PatternGridContainerMe
             final PatternType patternType = patternTypes[i];
             final PatternTypeButton button = new PatternTypeButton(
                 leftPos + 172,
-                topPos + imageHeight - bottomHeight + 4 + (i * (16 + 3)),
+                topPos + imageHeight - getInventoryHeight() - getInsertHeight() + 4 + (i * (16 + 3)),
                 btn -> getMenu().setPatternType(patternType),
                 patternType,
                 patternType == currentPatternType
@@ -273,6 +277,16 @@ public class PatternGridScreen extends AbstractGridScreen<PatternGridContainerMe
     }
 
     @Override
+    protected ResourceLocation getInsertTexture() {
+        return INSERT;
+    }
+
+    @Override
+    protected int getInsertHeight() {
+        return 77;
+    }
+
+    @Override
     public void patternTypeChanged(final PatternType newPatternType) {
         patternTypeButtons.values().forEach(button -> button.setSelected(false));
         patternTypeButtons.get(newPatternType).setSelected(true);
@@ -298,7 +312,7 @@ public class PatternGridScreen extends AbstractGridScreen<PatternGridContainerMe
     }
 
     private int getInsetY() {
-        return topPos + imageHeight - bottomHeight + 5;
+        return topPos + imageHeight - getInventoryHeight() - getInsertHeight() + 5;
     }
 
     @Override

@@ -29,6 +29,8 @@ import static com.refinedmods.refinedstorage.common.util.IdentifierUtil.createTr
 
 public class CraftingGridScreen extends AbstractGridScreen<AbstractCraftingGridContainerMenu> {
     private static final ResourceLocation TEXTURE = createIdentifier("textures/gui/crafting_grid.png");
+    private static final ResourceLocation INSERT_TEXTURE =
+        createIdentifier("textures/gui/workstations/crafting_matrix.png");
 
     private static final WidgetSprites CLEAR_BUTTON_TO_PLAYER_INVENTORY_SPRITES = new WidgetSprites(
         createIdentifier("widget/move_down"),
@@ -54,7 +56,7 @@ public class CraftingGridScreen extends AbstractGridScreen<AbstractCraftingGridC
     public CraftingGridScreen(final AbstractCraftingGridContainerMenu menu,
                               final Inventory inventory,
                               final Component title) {
-        super(menu, inventory, title, 156);
+        super(menu, inventory, title);
         this.inventoryLabelY = 134;
         this.imageWidth = 193;
         this.imageHeight = 229;
@@ -66,7 +68,7 @@ public class CraftingGridScreen extends AbstractGridScreen<AbstractCraftingGridC
 
         final int clearToNetworkButtonX = getClearButtonX(0);
         final int clearToInventoryButtonX = getClearButtonX(1);
-        final int clearButtonY = topPos + imageHeight - bottomHeight + 4;
+        final int clearButtonY = topPos + imageHeight - getInventoryHeight() - getInsertHeight() + 4;
 
         clearToNetworkButton = createClearButton(clearToNetworkButtonX, clearButtonY, false);
         setClearToNetworkButtonActive(getMenu().isActive());
@@ -85,6 +87,11 @@ public class CraftingGridScreen extends AbstractGridScreen<AbstractCraftingGridC
         if (filteringBasedOnCraftingMatrixItems) {
             renderCraftingMatrixFilteringHighlights(graphics);
         }
+    }
+
+    @Override
+    protected ResourceLocation getInsertTexture() {
+        return INSERT_TEXTURE;
     }
 
     private void renderCraftingMatrixFilteringHighlights(final GuiGraphics graphics) {
@@ -196,6 +203,11 @@ public class CraftingGridScreen extends AbstractGridScreen<AbstractCraftingGridC
     @Override
     protected ResourceLocation getTexture() {
         return TEXTURE;
+    }
+
+    @Override
+    protected int getInsertHeight() {
+        return 58;
     }
 
     @Override

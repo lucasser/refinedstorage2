@@ -18,6 +18,8 @@ public class PortableGridScreen extends AbstractGridScreen<AbstractPortableGridC
     private static final int DISK_SLOT_HEIGHT = 26;
 
     private static final ResourceLocation TEXTURE = createIdentifier("textures/gui/portable_grid.png");
+    private static final ResourceLocation INVENTORY = createIdentifier("textures/gui/portable_grid_inventory.png");
+    private static final ResourceLocation INSERT = createIdentifier("textures/gui/workstations/blank_insert_2.png");
 
     @Nullable
     private ProgressWidget progressWidget;
@@ -25,7 +27,7 @@ public class PortableGridScreen extends AbstractGridScreen<AbstractPortableGridC
     public PortableGridScreen(final AbstractPortableGridContainerMenu menu,
                               final Inventory inventory,
                               final Component title) {
-        super(menu, inventory, title, 99);
+        super(menu, inventory, title);
         this.inventoryLabelY = 75;
         this.imageWidth = 193;
         this.imageHeight = 176;
@@ -87,5 +89,15 @@ public class PortableGridScreen extends AbstractGridScreen<AbstractPortableGridC
     @Override
     protected ResourceLocation getTexture() {
         return TEXTURE;
+    }
+
+    @Override
+    protected ResourceLocation getInventoryTexture() {
+        return INVENTORY;
+    }
+
+    @Override
+    protected ResourceLocation getInsertTexture() {
+        return INSERT;
     }
 }

@@ -12,7 +12,7 @@ public class GridScreen<T extends AbstractGridContainerMenu> extends AbstractGri
     private static final ResourceLocation TEXTURE = createIdentifier("textures/gui/grid.png");
 
     public GridScreen(final T menu, final Inventory inventory, final Component title) {
-        super(menu, inventory, title, 99);
+        super(menu, inventory, title);
         this.inventoryLabelY = 75;
         this.imageWidth = 193;
         this.imageHeight = 176;

@@ -83,8 +83,6 @@ public abstract class AbstractGridScreen<T extends AbstractGridContainerMenu> ex
     private static final Component CLICK_TO_LEARN_MORE =
         createTranslation("gui", "grid.tenth_anniversary_ribbon.click_to_learn_more");
 
-    protected final int bottomHeight;
-
     @Nullable
     GridSearchBoxWidget searchField;
 
@@ -95,12 +93,10 @@ public abstract class AbstractGridScreen<T extends AbstractGridContainerMenu> ex
     private int currentGridSlotIndex;
 
     private final boolean tenthAnniversaryRibbonVisible = shouldDisplayTenthAnniversaryRibbon();
-    private final Inventory playerInventory;
 
     protected AbstractGridScreen(final T menu,
                                  final Inventory playerInventory,
-                                 final Component title,
-                                 final int bottomHeight) {
+                                 final Component title) {
         super(menu, playerInventory, shouldDisplayTenthAnniversaryRibbon() ? new TextMarquee(
             TENTH_ANNIVERSARY_RIBBON_TITLE,
             60,
@@ -111,8 +107,6 @@ public abstract class AbstractGridScreen<T extends AbstractGridContainerMenu> ex
         if (shouldDisplayTenthAnniversaryRibbon()) {
             this.titleLabelY -= 1;
         }
-        this.bottomHeight = bottomHeight;
-        this.playerInventory = playerInventory;
     }
 
     protected static boolean shouldDisplayTenthAnniversaryRibbon() {
@@ -229,16 +223,6 @@ public abstract class AbstractGridScreen<T extends AbstractGridContainerMenu> ex
             }
             graphics.blit(getTexture(), x, y + (ROW_SIZE * row), 0, textureY, imageWidth, ROW_SIZE);
         }
-    }
-
-    @Override
-    protected int getBottomHeight() {
-        return bottomHeight;
-    }
-
-    @Override
-    protected int getBottomV() {
-        return 73;
     }
 
     @Override
