@@ -15,6 +15,7 @@ import com.refinedmods.refinedstorage.common.api.constructordestructor.Destructo
 import com.refinedmods.refinedstorage.common.api.exporter.ExporterTransferStrategyFactory;
 import com.refinedmods.refinedstorage.common.api.grid.Grid;
 import com.refinedmods.refinedstorage.common.api.grid.GridSynchronizer;
+import com.refinedmods.refinedstorage.common.api.grid.workstations.IWorkstationRegistryElement;
 import com.refinedmods.refinedstorage.common.api.grid.strategy.GridExtractionStrategy;
 import com.refinedmods.refinedstorage.common.api.grid.strategy.GridExtractionStrategyFactory;
 import com.refinedmods.refinedstorage.common.api.grid.strategy.GridInsertionStrategy;
@@ -233,4 +234,6 @@ public interface RefinedStorageApi {
                                                           MenuType<?> menuType);
 
     StreamCodec<RegistryFriendlyByteBuf, StorageBlockData> getStorageBlockDataStreamCodec();
+
+    PlatformRegistry<IWorkstationRegistryElement> getWorkstationRegistry();
 }
