@@ -3,23 +3,19 @@ package com.refinedmods.refinedstorage.common.grid.workstations;
 import com.refinedmods.refinedstorage.common.api.grid.workstations.IWorkstationRegistryElement;
 import com.refinedmods.refinedstorage.common.api.grid.workstations.MatrixMenuFactory;
 
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
-import static com.refinedmods.refinedstorage.common.util.IdentifierUtil.createTranslation;
 
-public class WorkstationRegistryElement implements IWorkstationRegistryElement {
+public class WorkstationRegistryElement implements IWorkstationRegistryElement<AbstractCraftingMatrix> {
     public final ResourceLocation workstationId;
     public final MatrixMenuFactory<? extends AbstractCraftingMatrix> craftingMatrix;
-    //public final MatrixMenuFactory<? extends AbstractPatternMatrix<?>> patternMatrix;
     public final ItemStack icon;
     //public final MutableComponent translatedName;
 
     public WorkstationRegistryElement(final ResourceLocation workstationId,
                                       final MatrixMenuFactory<? extends AbstractCraftingMatrix> craftingMatrix,
-                                   /*final MatrixMenuFactory<? extends AbstractPatternMatrix<?>> patternMatrix,*/
-                                   final ItemStack icon) {
+                                      final ItemStack icon) {
         this.workstationId = workstationId;
         this.craftingMatrix = craftingMatrix;
         this.icon = icon;
@@ -27,17 +23,17 @@ public class WorkstationRegistryElement implements IWorkstationRegistryElement {
     }
 
     @Override
-    public String getID() {
-        return "";
+    public String getId() {
+        return workstationId.toString();
     }
 
     @Override
-    public Object getCraftingMatrix() {
-        return null;
+    public AbstractCraftingMatrix getCraftingMatrix() {
+        return craftingMatrix.create();
     }
 
     @Override
-    public Object getPatternMatrix() {
-        return null;
+    public ItemStack getIcon() {
+        return icon;
     }
 }
