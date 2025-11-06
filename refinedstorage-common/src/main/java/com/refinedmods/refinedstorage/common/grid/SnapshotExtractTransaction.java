@@ -6,9 +6,9 @@ import com.refinedmods.refinedstorage.api.resource.list.MutableResourceList;
 import com.refinedmods.refinedstorage.api.resource.list.MutableResourceListImpl;
 import com.refinedmods.refinedstorage.api.storage.root.RootStorage;
 import com.refinedmods.refinedstorage.common.api.storage.PlayerActor;
-import com.refinedmods.refinedstorage.common.support.RecipeMatrixContainer;
 import com.refinedmods.refinedstorage.common.support.resource.ItemResource;
 
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
@@ -20,19 +20,19 @@ public class SnapshotExtractTransaction implements ExtractTransaction {
 
     public SnapshotExtractTransaction(final Player player,
                                       final RootStorage rootStorage,
-                                      final RecipeMatrixContainer craftingMatrix) {
+                                      final Container craftingMatrix) {
         this.playerActor = new PlayerActor(player);
         this.rootStorage = rootStorage;
         addAvailableItems(craftingMatrix);
     }
 
-    private void addAvailableItems(final RecipeMatrixContainer craftingMatrix) {
+    private void addAvailableItems(final Container craftingMatrix) {
         for (int i = 0; i < craftingMatrix.getContainerSize(); ++i) {
             addAvailableItem(craftingMatrix, i);
         }
     }
 
-    private void addAvailableItem(final RecipeMatrixContainer craftingMatrix, final int craftingMatrixSlotIndex) {
+    private void addAvailableItem(final Container craftingMatrix, final int craftingMatrixSlotIndex) {
         final ItemStack craftingMatrixStack = craftingMatrix.getItem(craftingMatrixSlotIndex);
         if (craftingMatrixStack.isEmpty()) {
             return;

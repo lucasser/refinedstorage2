@@ -5,9 +5,10 @@ import com.refinedmods.refinedstorage.api.resource.list.MutableResourceList;
 import com.refinedmods.refinedstorage.api.resource.repository.ResourceRepositoryFilter;
 import com.refinedmods.refinedstorage.common.api.grid.view.GridResource;
 import com.refinedmods.refinedstorage.common.grid.view.ItemGridResource;
+import com.refinedmods.refinedstorage.common.grid.workstations.AbstractCraftingMatrix;
+import com.refinedmods.refinedstorage.common.grid.workstations.GridResultSlot;
 import com.refinedmods.refinedstorage.common.support.resource.ItemResource;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -23,11 +24,8 @@ import net.minecraft.world.item.ItemStack;
 import org.apiguardian.api.API;
 
 public abstract class AbstractCraftingGridContainerMenu extends AbstractGridContainerMenu {
-    private static final int Y_OFFSET_BETWEEN_PLAYER_INVENTORY_AND_FIRST_CRAFTING_MATRIX_SLOT = 69;
-
     private final Player gridPlayer;
     private final CraftingGrid craftingGrid;
-    private final List<Slot> craftingMatrixSlots = new ArrayList<>();
 
     @Nullable
     private Consumer<Boolean> activenessListener;
@@ -66,7 +64,7 @@ public abstract class AbstractCraftingGridContainerMenu extends AbstractGridCont
 
     @Override
     public boolean canTakeItemForPickAll(final ItemStack stack, final Slot slot) {
-        if (slot instanceof CraftingGridResultSlot) {
+        if (slot instanceof GridResultSlot) {
             return false;
         }
         return super.canTakeItemForPickAll(stack, slot);
@@ -77,7 +75,7 @@ public abstract class AbstractCraftingGridContainerMenu extends AbstractGridCont
     public ItemStack quickMoveStack(final Player actor, final int slotIndex) {
         final Slot slot = getSlot(slotIndex);
         if (!actor.level().isClientSide()
-            && slot instanceof CraftingGridResultSlot resultSlot
+            && slot instanceof GridResultSlot resultSlot
             && resultSlot.hasItem()) {
             final ItemStack craftedStack = resultSlot.onQuickCraft(actor);
             craftingGrid.acceptQuickCraft(actor, craftedStack);
@@ -89,26 +87,12 @@ public abstract class AbstractCraftingGridContainerMenu extends AbstractGridCont
     @Override
     public void resized(final int playerInventoryY, final int topYStart, final int topYEnd) {
         super.resized(playerInventoryY, topYStart, topYEnd);
-        craftingMatrixSlots.clear();
-        for (int y = 0; y < 3; ++y) {
-            for (int x = 0; x < 3; ++x) {
-                final int slotX = 26 + ((x % 3) * 18);
-                final int slotY = playerInventoryY
-                    - Y_OFFSET_BETWEEN_PLAYER_INVENTORY_AND_FIRST_CRAFTING_MATRIX_SLOT
-                    + ((y % 3) * 18);
-                craftingMatrixSlots.add(addSlot(new Slot(craftingGrid.getCraftingMatrix(), x + y * 3, slotX, slotY)));
-            }
-        }
-        addSlot(new CraftingGridResultSlot(
-            gridPlayer,
-            craftingGrid,
-            130 + 4,
-            playerInventoryY - Y_OFFSET_BETWEEN_PLAYER_INVENTORY_AND_FIRST_CRAFTING_MATRIX_SLOT + 18
-        ));
+        craftingGrid.getActiveMatrix().renderSlots(this, gridPlayer, playerInventoryY, topYStart, topYEnd);
+        getMatrixSlots().forEach(this::addSlot);
     }
 
-    public List<Slot> getCraftingMatrixSlots() {
-        return craftingMatrixSlots;
+    public List<Slot> getMatrixSlots() {
+        return craftingGrid.getActiveMatrix().getMatrixSlots();
     }
 
     public void clear(final boolean toPlayerInventory) {
@@ -118,7 +102,7 @@ public abstract class AbstractCraftingGridContainerMenu extends AbstractGridCont
     @API(status = API.Status.INTERNAL)
     public MutableResourceList getAvailableListForRecipeTransfer() {
         final MutableResourceList available = getRepository().copyBackingList();
-        addContainerToList(craftingGrid.getCraftingMatrix(), available);
+        addContainerToList(craftingGrid.getActiveMatrix().getMatrix(), available);
         addContainerToList(gridPlayer.getInventory(), available);
         return available;
     }
@@ -147,8 +131,8 @@ public abstract class AbstractCraftingGridContainerMenu extends AbstractGridCont
 
     private Set<ItemResource> getCraftingMatrixItems() {
         final Set<ItemResource> craftingMatrixItems = new HashSet<>();
-        for (int i = 0; i < craftingGrid.getCraftingMatrix().getContainerSize(); ++i) {
-            final ItemStack craftingMatrixStack = craftingGrid.getCraftingMatrix().getItem(i);
+        for (int i = 0; i < craftingGrid.getActiveMatrix().getMatrix().getContainerSize(); ++i) {
+            final ItemStack craftingMatrixStack = craftingGrid.getActiveMatrix().getMatrix().getItem(i);
             if (craftingMatrixStack.isEmpty()) {
                 continue;
             }
@@ -168,7 +152,8 @@ public abstract class AbstractCraftingGridContainerMenu extends AbstractGridCont
     @Nullable
     @Override
     protected ResourceKey getResourceForAutocraftableHint(final Slot slot) {
-        if (slot.container == craftingGrid.getCraftingMatrix() || slot.container == craftingGrid.getCraftingResult()) {
+        if (slot.container == craftingGrid.getActiveMatrix().getMatrix()
+            || slot.container == craftingGrid.getResult().get()) {
             return ItemResource.ofItemStack(slot.getItem());
         }
         return super.getResourceForAutocraftableHint(slot);
@@ -176,6 +161,10 @@ public abstract class AbstractCraftingGridContainerMenu extends AbstractGridCont
 
     @Override
     public boolean isLargeSlot(final Slot slot) {
-        return slot.container == craftingGrid.getCraftingResult() || super.isLargeSlot(slot);
+        return slot.container == craftingGrid.getResult().get() || super.isLargeSlot(slot);
+    }
+
+    public AbstractCraftingMatrix getMatrix() {
+        return craftingGrid.getActiveMatrix();
     }
 }

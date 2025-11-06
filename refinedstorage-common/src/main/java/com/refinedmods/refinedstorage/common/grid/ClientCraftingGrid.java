@@ -12,7 +12,8 @@ import com.refinedmods.refinedstorage.api.storage.Storage;
 import com.refinedmods.refinedstorage.api.storage.TrackedResourceAmount;
 import com.refinedmods.refinedstorage.common.api.support.resource.PlatformResourceKey;
 import com.refinedmods.refinedstorage.common.api.support.resource.ResourceType;
-import com.refinedmods.refinedstorage.common.support.RecipeMatrixContainer;
+import com.refinedmods.refinedstorage.common.grid.workstations.AbstractCraftingMatrix;
+import com.refinedmods.refinedstorage.common.grid.workstations.CraftingCraftingMatrix;
 import com.refinedmods.refinedstorage.common.support.packet.c2s.C2SPackets;
 import com.refinedmods.refinedstorage.common.support.resource.ItemResource;
 
@@ -23,28 +24,31 @@ import java.util.concurrent.CompletableFuture;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingInput;
 
 class ClientCraftingGrid implements CraftingGrid {
-    private final RecipeMatrixContainer craftingMatrix;
-    private final ResultContainer craftingResult;
+    private final AbstractCraftingMatrix craftingMatrix;
 
     ClientCraftingGrid() {
-        this.craftingMatrix = new RecipeMatrixContainer(null, 3, 3);
-        this.craftingResult = new ResultContainer();
+        this.craftingMatrix = new CraftingCraftingMatrix(
+            null,
+            () -> null,
+            this
+        );
     }
 
     @Override
-    public RecipeMatrixContainer getCraftingMatrix() {
+    public AbstractCraftingMatrix getActiveMatrix() {
         return craftingMatrix;
     }
 
+    //TODO: problem
     @Override
-    public ResultContainer getCraftingResult() {
-        return craftingResult;
+    public Optional<Container> getResult() {
+        return craftingMatrix.getResult();
     }
 
     @Override

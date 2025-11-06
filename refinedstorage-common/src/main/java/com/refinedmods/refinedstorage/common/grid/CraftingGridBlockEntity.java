@@ -7,13 +7,15 @@ import com.refinedmods.refinedstorage.common.Platform;
 import com.refinedmods.refinedstorage.common.api.storage.PlayerActor;
 import com.refinedmods.refinedstorage.common.content.BlockEntities;
 import com.refinedmods.refinedstorage.common.content.ContentNames;
+import com.refinedmods.refinedstorage.common.grid.workstations.AbstractCraftingMatrix;
+import com.refinedmods.refinedstorage.common.grid.workstations.CraftingCraftingMatrix;
+import com.refinedmods.refinedstorage.common.grid.workstations.WorkstationList;
 import com.refinedmods.refinedstorage.common.support.BlockEntityWithDrops;
-import com.refinedmods.refinedstorage.common.support.RecipeMatrix;
-import com.refinedmods.refinedstorage.common.support.RecipeMatrixContainer;
 import com.refinedmods.refinedstorage.common.support.containermenu.NetworkNodeExtendedMenuProvider;
 import com.refinedmods.refinedstorage.common.support.resource.ItemResource;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
@@ -24,23 +26,23 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamEncoder;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingInput;
-import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class CraftingGridBlockEntity extends AbstractGridBlockEntity implements BlockEntityWithDrops,
     NetworkNodeExtendedMenuProvider<GridData>, CraftingGrid {
-    private static final String TAG_MATRIX = "matrix";
+    private static final String TAG_WORKSTATION_LIST = "workstations";
+    private static final String TAG_WORKSTATION_AMOUNT = "workstation_amount";
 
-    private final RecipeMatrix<CraftingRecipe, CraftingInput> craftingRecipe = RecipeMatrix.crafting(
-        this::setChanged,
-        this::getLevel
-    );
+    private final WorkstationList<AbstractCraftingMatrix> matrixList = new WorkstationList<>();
+
+    @Nullable
+    private AbstractCraftingMatrix activeMatrix;
 
     public CraftingGridBlockEntity(final BlockPos pos, final BlockState state) {
         super(
@@ -49,21 +51,27 @@ public class CraftingGridBlockEntity extends AbstractGridBlockEntity implements 
             state,
             Platform.INSTANCE.getConfig().getCraftingGrid().getEnergyUsage()
         );
+
+        matrixList.add(new CraftingCraftingMatrix(
+            this::setChanged,
+            this::getLevel,
+            this
+        ));
     }
 
     @Override
-    public RecipeMatrixContainer getCraftingMatrix() {
-        return craftingRecipe.getMatrix();
+    public AbstractCraftingMatrix getActiveMatrix() {
+        return activeMatrix;
     }
 
     @Override
-    public ResultContainer getCraftingResult() {
-        return craftingRecipe.getResult();
+    public Optional<Container> getResult() {
+        return activeMatrix.getResult();
     }
 
     @Override
     public NonNullList<ItemStack> getRemainingItems(final Player player, final CraftingInput input) {
-        return craftingRecipe.getRemainingItems(level, player, input);
+        return activeMatrix.getRemainingItems(player, input);
     }
 
     @Override
@@ -72,27 +80,27 @@ public class CraftingGridBlockEntity extends AbstractGridBlockEntity implements 
             .map(network -> network.getComponent(StorageNetworkComponent.class))
             .map(storage -> directCommit
                 ? new DirectCommitExtractTransaction(storage)
-                : new SnapshotExtractTransaction(player, storage, getCraftingMatrix()))
+                : new SnapshotExtractTransaction(player, storage, getActiveMatrix().getMatrix()))
             .orElse(ExtractTransaction.NOOP);
     }
 
     @Override
     public boolean clearMatrix(final Player player, final boolean toPlayerInventory) {
         return toPlayerInventory
-            ? getCraftingMatrix().clearToPlayerInventory(player)
+            ? getActiveMatrix().clearToPlayerInventory(player)
             : clearMatrixIntoStorage(player);
     }
 
     private boolean clearMatrixIntoStorage(final Player player) {
         return getNetwork()
             .map(network -> network.getComponent(StorageNetworkComponent.class))
-            .map(storage -> getCraftingMatrix().clearIntoStorage(storage, player))
+            .map(storage -> getActiveMatrix().clearIntoStorage(storage, player))
             .orElse(false);
     }
 
     @Override
     public void transferRecipe(final Player player, final List<List<ItemResource>> recipe) {
-        getCraftingMatrix().transferRecipe(
+        getActiveMatrix().transferRecipe(
             player,
             getNetwork().map(network -> network.getComponent(StorageNetworkComponent.class)).orElse(null),
             recipe
@@ -141,31 +149,59 @@ public class CraftingGridBlockEntity extends AbstractGridBlockEntity implements 
         return new CraftingGridContainerMenu(syncId, inventory, this);
     }
 
+    //TODO: dont save empty matrices
     @Override
     public void saveAdditional(final CompoundTag tag, final HolderLookup.Provider provider) {
         super.saveAdditional(tag, provider);
-        tag.put(TAG_MATRIX, craftingRecipe.writeToTag(provider));
+        final CompoundTag workstationList = new CompoundTag();
+        matrixList.forEach(matrix -> {
+            workstationList.put(matrix.getWorkstationType(), matrix.writeToTag(provider));
+        });
+        tag.put(TAG_WORKSTATION_LIST, workstationList);
+        tag.putInt(TAG_WORKSTATION_AMOUNT, matrixList.size());
     }
 
+
+    //TODO: replace with registry lookup, create a list if none found (for world upgrade stuff)
     @Override
     public void loadAdditional(final CompoundTag tag, final HolderLookup.Provider provider) {
         super.loadAdditional(tag, provider);
-        if (tag.contains(TAG_MATRIX)) {
-            craftingRecipe.readFromTag(tag.getCompound(TAG_MATRIX), provider);
+        if (tag.contains(TAG_WORKSTATION_LIST)) {
+            makeWorkstationList(tag.getCompound(TAG_WORKSTATION_LIST), provider);
         }
+    }
+
+    //TODO: foreach workstation in registry
+    private void makeWorkstationList(final CompoundTag tag, final HolderLookup.Provider provider) {
+        if (tag.contains("crafting.crafting")) {
+            AbstractCraftingMatrix matrix;
+            try {
+                matrix = matrixList.getById("crafting.crafting");
+            } catch (NoSuchElementException e) {
+                matrix = new CraftingCraftingMatrix(
+                    this::setChanged,
+                    this::getLevel,
+                    this
+                );
+            }
+            matrix.readFromTag(tag.getCompound("crafting.crafting"), provider);
+            matrixList.add(matrix);
+        }
+
+        activeMatrix = matrixList.getById("crafting.crafting");
     }
 
     @Override
     public void setLevel(final Level level) {
         super.setLevel(level);
-        craftingRecipe.updateResult(level);
     }
 
+    //TODO: should be all matrices
     @Override
     public final NonNullList<ItemStack> getDrops() {
         final NonNullList<ItemStack> drops = NonNullList.create();
-        for (int i = 0; i < craftingRecipe.getMatrix().getContainerSize(); ++i) {
-            drops.add(craftingRecipe.getMatrix().getItem(i));
+        for (int i = 0; i < activeMatrix.getMatrix().getContainerSize(); ++i) {
+            drops.add(activeMatrix.getMatrix().getItem(i));
         }
         return drops;
     }

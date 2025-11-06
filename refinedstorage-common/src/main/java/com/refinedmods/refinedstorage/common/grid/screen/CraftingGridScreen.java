@@ -29,8 +29,6 @@ import static com.refinedmods.refinedstorage.common.util.IdentifierUtil.createTr
 
 public class CraftingGridScreen extends AbstractGridScreen<AbstractCraftingGridContainerMenu> {
     private static final ResourceLocation TEXTURE = createIdentifier("textures/gui/crafting_grid.png");
-    private static final ResourceLocation INSERT_TEXTURE =
-        createIdentifier("textures/gui/workstations/crafting_matrix.png");
 
     private static final WidgetSprites CLEAR_BUTTON_TO_PLAYER_INVENTORY_SPRITES = new WidgetSprites(
         createIdentifier("widget/move_down"),
@@ -91,11 +89,11 @@ public class CraftingGridScreen extends AbstractGridScreen<AbstractCraftingGridC
 
     @Override
     protected ResourceLocation getInsertTexture() {
-        return INSERT_TEXTURE;
+        return this.menu.getMatrix().getInsert();
     }
 
     private void renderCraftingMatrixFilteringHighlights(final GuiGraphics graphics) {
-        for (final Slot slot : getMenu().getCraftingMatrixSlots()) {
+        for (final Slot slot : getMenu().getMatrixSlots()) {
             if (!slot.hasItem()) {
                 continue;
             }
@@ -207,7 +205,7 @@ public class CraftingGridScreen extends AbstractGridScreen<AbstractCraftingGridC
 
     @Override
     protected int getInsertHeight() {
-        return 58;
+        return this.menu.getMatrix().getInsertHeight();
     }
 
     @Override
