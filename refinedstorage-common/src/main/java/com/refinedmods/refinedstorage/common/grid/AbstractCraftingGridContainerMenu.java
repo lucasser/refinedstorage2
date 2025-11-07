@@ -6,7 +6,7 @@ import com.refinedmods.refinedstorage.api.resource.repository.ResourceRepository
 import com.refinedmods.refinedstorage.common.api.grid.view.GridResource;
 import com.refinedmods.refinedstorage.common.grid.view.ItemGridResource;
 import com.refinedmods.refinedstorage.common.grid.workstations.AbstractCraftingMatrix;
-import com.refinedmods.refinedstorage.common.grid.workstations.GridResultSlot;
+import com.refinedmods.refinedstorage.common.grid.workstations.AbstractGridResultSlot;
 import com.refinedmods.refinedstorage.common.support.resource.ItemResource;
 
 import java.util.HashSet;
@@ -64,7 +64,7 @@ public abstract class AbstractCraftingGridContainerMenu extends AbstractGridCont
 
     @Override
     public boolean canTakeItemForPickAll(final ItemStack stack, final Slot slot) {
-        if (slot instanceof GridResultSlot) {
+        if (slot instanceof AbstractGridResultSlot) {
             return false;
         }
         return super.canTakeItemForPickAll(stack, slot);
@@ -75,7 +75,7 @@ public abstract class AbstractCraftingGridContainerMenu extends AbstractGridCont
     public ItemStack quickMoveStack(final Player actor, final int slotIndex) {
         final Slot slot = getSlot(slotIndex);
         if (!actor.level().isClientSide()
-            && slot instanceof GridResultSlot resultSlot
+            && slot instanceof AbstractGridResultSlot resultSlot
             && resultSlot.hasItem()) {
             final ItemStack craftedStack = resultSlot.onQuickCraft(actor);
             craftingGrid.acceptQuickCraft(actor, craftedStack);

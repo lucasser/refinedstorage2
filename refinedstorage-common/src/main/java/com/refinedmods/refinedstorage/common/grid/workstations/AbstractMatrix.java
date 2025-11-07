@@ -44,4 +44,6 @@ public interface AbstractMatrix {
     void transferRecipe(Player player,
                         @Nullable RootStorage rootStorage,
                         List<List<ItemResource>> recipe);
+
+    void updateMatrixAndNotifyListenerLater(Runnable runnable);
 }

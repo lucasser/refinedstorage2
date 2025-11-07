@@ -14,6 +14,7 @@ import com.refinedmods.refinedstorage.common.api.support.resource.PlatformResour
 import com.refinedmods.refinedstorage.common.api.support.resource.ResourceType;
 import com.refinedmods.refinedstorage.common.grid.workstations.AbstractCraftingMatrix;
 import com.refinedmods.refinedstorage.common.grid.workstations.CraftingCraftingMatrix;
+import com.refinedmods.refinedstorage.common.grid.workstations.CraftingSmithingMatrix;
 import com.refinedmods.refinedstorage.common.support.packet.c2s.C2SPackets;
 import com.refinedmods.refinedstorage.common.support.resource.ItemResource;
 

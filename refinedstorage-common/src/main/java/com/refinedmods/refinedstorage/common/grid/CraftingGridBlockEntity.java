@@ -188,7 +188,22 @@ public class CraftingGridBlockEntity extends AbstractGridBlockEntity implements 
             matrixList.add(matrix);
         }
 
-        activeMatrix = matrixList.getById("crafting.crafting");
+        /*if (tag.contains("crafting.smithing")) {
+            AbstractCraftingMatrix matrix;
+            try {
+                matrix = matrixList.getById("crafting.smithing");
+            } catch (NoSuchElementException e) {
+                matrix = new CraftingSmithingMatrix(
+                    this::setChanged,
+                    this::getLevel,
+                    this
+                );
+            }
+            matrix.readFromTag(tag.getCompound("crafting.smithing"), provider);
+            matrixList.add(matrix);
+        }*/
+
+        activeMatrix = matrixList.getById("crafting.smithing");
     }
 
     @Override

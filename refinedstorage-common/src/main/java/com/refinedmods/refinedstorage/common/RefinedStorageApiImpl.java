@@ -659,8 +659,8 @@ public class RefinedStorageApiImpl implements RefinedStorageApi {
         return StorageBlockCodecs.STREAM_CODEC;
     }
 
-    @Override
-    public PlatformRegistry<IWorkstationRegistryElement> getWorkstationRegistry() {
-        return workstationRegistry;
-    }
+//    @Override
+//    public PlatformRegistry<IWorkstationRegistryElement> getWorkstationRegistry() {
+//        return workstationRegistry;
+//    }
 }

@@ -6,6 +6,7 @@ import com.refinedmods.refinedstorage.common.grid.AbstractGridContainerMenu;
 import com.refinedmods.refinedstorage.common.grid.CraftingGrid;
 import com.refinedmods.refinedstorage.common.grid.ExtractTransaction;
 import com.refinedmods.refinedstorage.common.support.RecipeMatrixContainer;
+import com.refinedmods.refinedstorage.common.support.containermenu.FilterSlot;
 import com.refinedmods.refinedstorage.common.support.resource.ItemResource;
 
 import java.util.ArrayList;
@@ -27,17 +28,17 @@ import net.minecraft.world.level.Level;
 
 import static com.refinedmods.refinedstorage.common.util.IdentifierUtil.createIdentifier;
 
-public class CraftingCraftingMatrix extends CraftingMatrix implements AbstractCraftingMatrix {
+public class CraftingSmithingMatrix extends SmithingMatrix implements AbstractCraftingMatrix {
 
     private static final ResourceLocation INSERT_TEXTURE =
-        createIdentifier("textures/gui/workstations/crafting_matrix.png");
+        createIdentifier("textures/gui/workstations/smithing_matrix.png");
 
     @Nullable
-    private CraftingGridResultSlot resultSlot;
+    private SmithingGridResultSlot resultSlot;
 
     private final CraftingGrid craftingGrid;
 
-    public CraftingCraftingMatrix(@Nullable final Runnable listener,
+    public CraftingSmithingMatrix(@Nullable final Runnable listener,
                                   final Supplier<@NullableType Level> levelSupplier,
                                   final CraftingGrid craftingGrid) {
         super(listener, levelSupplier);
@@ -68,21 +69,22 @@ public class CraftingCraftingMatrix extends CraftingMatrix implements AbstractCr
                             final int topYStart,
                             final int topYEnd) {
         matrixSlots.clear();
-        for (int y = 0; y < 3; ++y) {
-            for (int x = 0; x < 3; ++x) {
-                final int slotX = 26 + ((x % 3) * 18);
-                final int slotY = playerInventoryY
-                    - Y_OFFSET_BETWEEN_PLAYER_INVENTORY_AND_FIRST_CRAFTING_MATRIX_SLOT
-                    + ((y % 3) * 18);
-                matrixSlots.add(new Slot(getMatrix(), x + y * 3, slotX, slotY));
-            }
+        final int y = playerInventoryY - Y_OFFSET_BETWEEN_PLAYER_INVENTORY_AND_SMITHING_TABLE_SLOTS;
+        for (int i = 0; i < 3; ++i) {
+            final int ii = i;
+            matrixSlots.add(new FilterSlot(getMatrix(), i, 8 + (i * 18), y) {
+                @Override
+                public boolean mayPlace(final ItemStack stack) {
+                    return smithingTableRecipes.stream().anyMatch(recipe -> switch (ii) {
+                        case 0 -> recipe.value().isTemplateIngredient(stack);
+                        case 1 -> recipe.value().isBaseIngredient(stack);
+                        case 2 -> recipe.value().isAdditionIngredient(stack);
+                        default -> false;
+                    });
+                }
+            });
         }
-        resultSlot = new CraftingGridResultSlot(
-            gridPlayer,
-            this,
-            130 + 4,
-            playerInventoryY - Y_OFFSET_BETWEEN_PLAYER_INVENTORY_AND_FIRST_CRAFTING_MATRIX_SLOT + 18
-        );
+        resultSlot = new SmithingGridResultSlot(gridPlayer, this, 98, y);
     }
 
     @Override
