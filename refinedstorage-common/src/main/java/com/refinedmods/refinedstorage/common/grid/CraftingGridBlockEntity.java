@@ -8,7 +8,9 @@ import com.refinedmods.refinedstorage.common.api.storage.PlayerActor;
 import com.refinedmods.refinedstorage.common.content.BlockEntities;
 import com.refinedmods.refinedstorage.common.content.ContentNames;
 import com.refinedmods.refinedstorage.common.grid.workstations.AbstractCraftingMatrix;
+import com.refinedmods.refinedstorage.common.grid.workstations.AbstractMatrix;
 import com.refinedmods.refinedstorage.common.grid.workstations.CraftingCraftingMatrix;
+import com.refinedmods.refinedstorage.common.grid.workstations.CraftingSmithingMatrix;
 import com.refinedmods.refinedstorage.common.grid.workstations.WorkstationList;
 import com.refinedmods.refinedstorage.common.support.BlockEntityWithDrops;
 import com.refinedmods.refinedstorage.common.support.containermenu.NetworkNodeExtendedMenuProvider;
@@ -51,12 +53,17 @@ public class CraftingGridBlockEntity extends AbstractGridBlockEntity implements 
             state,
             Platform.INSTANCE.getConfig().getCraftingGrid().getEnergyUsage()
         );
-
+        matrixList.add(new CraftingSmithingMatrix(
+            this::setChanged,
+            this::getLevel,
+            this
+        ));
         matrixList.add(new CraftingCraftingMatrix(
             this::setChanged,
             this::getLevel,
             this
         ));
+        activeMatrix = matrixList.getById("crafting.crafting");
     }
 
     @Override
@@ -188,7 +195,7 @@ public class CraftingGridBlockEntity extends AbstractGridBlockEntity implements 
             matrixList.add(matrix);
         }
 
-        /*if (tag.contains("crafting.smithing")) {
+        if (tag.contains("crafting.smithing")) {
             AbstractCraftingMatrix matrix;
             try {
                 matrix = matrixList.getById("crafting.smithing");
@@ -201,14 +208,15 @@ public class CraftingGridBlockEntity extends AbstractGridBlockEntity implements 
             }
             matrix.readFromTag(tag.getCompound("crafting.smithing"), provider);
             matrixList.add(matrix);
-        }*/
+        }
 
-        activeMatrix = matrixList.getById("crafting.smithing");
+        activeMatrix = matrixList.getById("crafting.crafting");
     }
 
     @Override
     public void setLevel(final Level level) {
         super.setLevel(level);
+        matrixList.forEach(AbstractMatrix::levelChanged);
     }
 
     //TODO: should be all matrices

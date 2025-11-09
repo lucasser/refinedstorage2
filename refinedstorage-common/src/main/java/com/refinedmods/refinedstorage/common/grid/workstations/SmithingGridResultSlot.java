@@ -45,7 +45,7 @@ public class SmithingGridResultSlot extends AbstractGridResultSlot {
         getInputMatrix().changed();
     }
 
-    //TODO: needs to be different depending on recipe type
+    //TODO: needs to be different depending on recipe type. Play smithing sound
     @Override
     protected void fireCraftingEvents(final Player player, final ItemStack crafted) {
         // reimplementation of checkTakeAchievements

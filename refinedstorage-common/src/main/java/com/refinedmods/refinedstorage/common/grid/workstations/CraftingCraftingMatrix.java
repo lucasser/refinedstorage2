@@ -11,9 +11,13 @@ import com.refinedmods.refinedstorage.common.support.resource.ItemResource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -62,11 +66,19 @@ public class CraftingCraftingMatrix extends CraftingMatrix implements AbstractCr
     }
 
     @Override
-    public void renderSlots(final AbstractGridContainerMenu menu,
-                            final Player gridPlayer,
-                            final int playerInventoryY,
-                            final int topYStart,
-                            final int topYEnd) {
+    public void prepRenderers(final AbstractGridContainerMenu menu,
+                              final Player gridPlayer,
+                              final int playerInventoryY,
+                              final int topYStart,
+                              final int topYEnd) {
+        prepSlots(menu, gridPlayer, playerInventoryY, topYStart, topYEnd);
+    }
+
+    private void prepSlots(final AbstractGridContainerMenu menu,
+                           final Player gridPlayer,
+                           final int playerInventoryY,
+                           final int topYStart,
+                           final int topYEnd) {
         matrixSlots.clear();
         for (int y = 0; y < 3; ++y) {
             for (int x = 0; x < 3; ++x) {
@@ -83,6 +95,25 @@ public class CraftingCraftingMatrix extends CraftingMatrix implements AbstractCr
             130 + 4,
             playerInventoryY - Y_OFFSET_BETWEEN_PLAYER_INVENTORY_AND_FIRST_CRAFTING_MATRIX_SLOT + 18
         );
+    }
+
+    @Override
+    public void render(final AbstractGridContainerMenu menu,
+                       final GuiGraphics graphics, final float partialTicks,
+                       final int mouseX, final int mouseY, final int topX, final int topY, final int insertY) {
+
+    }
+
+    @Override
+    public void renderTooltip(final Font font, @org.jetbrains.annotations.Nullable final Slot hoveredSlot,
+                              final GuiGraphics graphics,
+                              final int mouseX, final int mouseY) {
+
+    }
+
+    @Override
+    public void addWidgets(final Consumer<AbstractWidget> widgets, final Consumer<AbstractWidget> renderables) {
+
     }
 
     @Override
@@ -144,5 +175,13 @@ public class CraftingCraftingMatrix extends CraftingMatrix implements AbstractCr
 
     public void updateMatrixAndNotifyListenerLater(final Runnable runnable) {
         recipeContainer.updateMatrixAndNotifyListenerLater(runnable);
+    }
+
+    @Override
+    public void tick() {
+    }
+
+    @Override
+    public void levelChanged() {
     }
 }

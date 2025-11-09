@@ -63,7 +63,6 @@ public class CraftingGridScreen extends AbstractGridScreen<AbstractCraftingGridC
     @Override
     protected void init() {
         super.init();
-
         final int clearToNetworkButtonX = getClearButtonX(0);
         final int clearToInventoryButtonX = getClearButtonX(1);
         final int clearButtonY = topPos + imageHeight - getInventoryHeight() - getInsertHeight() + 4;
@@ -73,6 +72,7 @@ public class CraftingGridScreen extends AbstractGridScreen<AbstractCraftingGridC
         getMenu().setActivenessListener(this::setClearToNetworkButtonActive);
         addRenderableWidget(clearToNetworkButton);
         addRenderableWidget(createClearButton(clearToInventoryButtonX, clearButtonY, true));
+        getMenu().getMatrix().addWidgets(this::addWidget, this::addRenderableWidget);
     }
 
     private int getClearButtonX(final int i) {
@@ -85,11 +85,15 @@ public class CraftingGridScreen extends AbstractGridScreen<AbstractCraftingGridC
         if (filteringBasedOnCraftingMatrixItems) {
             renderCraftingMatrixFilteringHighlights(graphics);
         }
+        final int x = (width - imageWidth) / 2;
+        final int y = (height - imageHeight) / 2;
+        final int insertY = topPos + imageHeight - getInventoryHeight();
+        getMenu().getMatrix().render(menu, graphics, delta, mouseX, mouseY, x, y, insertY);
     }
 
     @Override
     protected ResourceLocation getInsertTexture() {
-        return this.menu.getMatrix().getInsert();
+        return getMenu().getMatrix().getInsert();
     }
 
     private void renderCraftingMatrixFilteringHighlights(final GuiGraphics graphics) {
@@ -127,6 +131,7 @@ public class CraftingGridScreen extends AbstractGridScreen<AbstractCraftingGridC
                 searchField.setEditable(true);
             }
         }
+        getMenu().getMatrix().tick();
     }
 
     private void setClearToNetworkButtonActive(final boolean active) {
@@ -205,7 +210,7 @@ public class CraftingGridScreen extends AbstractGridScreen<AbstractCraftingGridC
 
     @Override
     protected int getInsertHeight() {
-        return this.menu.getMatrix().getInsertHeight();
+        return getMenu().getMatrix().getInsertHeight();
     }
 
     @Override
@@ -230,6 +235,7 @@ public class CraftingGridScreen extends AbstractGridScreen<AbstractCraftingGridC
             Platform.INSTANCE.renderTooltip(graphics, processedLines, x, y);
             return;
         }
+        getMenu().getMatrix().renderTooltip(font, hoveredSlot, graphics, x, y);
         super.renderTooltip(graphics, x, y);
     }
 }

@@ -9,11 +9,16 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 public abstract class AbstractGridResultSlot extends Slot {
+
+    private int removeCount;
+    private Player gridPlayer;
+
     AbstractGridResultSlot(final Player player,
                            final AbstractCraftingMatrix matrix,
                            final int x,
                            final int y) {
         super(matrix.getResult().get(), 0, x, y);
+        this.gridPlayer = player;
     }
 
     public ItemStack onQuickCraft(final Player player) {
@@ -76,4 +81,20 @@ public abstract class AbstractGridResultSlot extends Slot {
     protected abstract void fireCraftingEvents(Player player, ItemStack crafted);
     
     protected abstract AbstractCraftingMatrix getInputMatrix();
+
+    public boolean isFake() {
+        return true;
+    }
+
+    public boolean mayPlace(final ItemStack stack) {
+        return false;
+    }
+
+    public ItemStack remove(final int amount) {
+        if (this.hasItem()) {
+            this.removeCount += Math.min(amount, this.getItem().getCount());
+        }
+
+        return super.remove(amount);
+    }
 }

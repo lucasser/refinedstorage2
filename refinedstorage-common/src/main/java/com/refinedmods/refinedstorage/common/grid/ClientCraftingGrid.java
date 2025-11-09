@@ -14,6 +14,7 @@ import com.refinedmods.refinedstorage.common.api.support.resource.PlatformResour
 import com.refinedmods.refinedstorage.common.api.support.resource.ResourceType;
 import com.refinedmods.refinedstorage.common.grid.workstations.AbstractCraftingMatrix;
 import com.refinedmods.refinedstorage.common.grid.workstations.CraftingCraftingMatrix;
+import com.refinedmods.refinedstorage.common.grid.workstations.CraftingMatrix;
 import com.refinedmods.refinedstorage.common.grid.workstations.CraftingSmithingMatrix;
 import com.refinedmods.refinedstorage.common.support.packet.c2s.C2SPackets;
 import com.refinedmods.refinedstorage.common.support.resource.ItemResource;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerPlayer;
@@ -29,16 +31,18 @@ import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.level.Level;
 
 class ClientCraftingGrid implements CraftingGrid {
     private final AbstractCraftingMatrix craftingMatrix;
 
-    ClientCraftingGrid() {
+    ClientCraftingGrid(final Supplier<Level> levelSupplier) {
         this.craftingMatrix = new CraftingCraftingMatrix(
             null,
-            () -> null,
+            levelSupplier,
             this
         );
+        craftingMatrix.levelChanged();
     }
 
     @Override

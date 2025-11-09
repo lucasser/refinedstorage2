@@ -37,7 +37,7 @@ public abstract class AbstractCraftingGridContainerMenu extends AbstractGridCont
                                                 final Inventory playerInventory,
                                                 final GridData gridData) {
         super(menuType, syncId, playerInventory, gridData);
-        this.craftingGrid = new ClientCraftingGrid();
+        this.craftingGrid = new ClientCraftingGrid(playerInventory.player::level);
         this.gridPlayer = playerInventory.player;
     }
 
@@ -87,7 +87,7 @@ public abstract class AbstractCraftingGridContainerMenu extends AbstractGridCont
     @Override
     public void resized(final int playerInventoryY, final int topYStart, final int topYEnd) {
         super.resized(playerInventoryY, topYStart, topYEnd);
-        craftingGrid.getActiveMatrix().renderSlots(this, gridPlayer, playerInventoryY, topYStart, topYEnd);
+        craftingGrid.getActiveMatrix().prepRenderers(this, gridPlayer, playerInventoryY, topYStart, topYEnd);
         getMatrixSlots().forEach(this::addSlot);
     }
 
