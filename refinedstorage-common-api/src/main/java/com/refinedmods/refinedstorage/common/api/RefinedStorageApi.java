@@ -235,5 +235,5 @@ public interface RefinedStorageApi {
 
     StreamCodec<RegistryFriendlyByteBuf, StorageBlockData> getStorageBlockDataStreamCodec();
 
-    //PlatformRegistry<IWorkstationRegistryElement<?, ?>> getWorkstationRegistry();
+    PlatformRegistry<? extends IWorkstationRegistryElement<?, ?>> getCraftingWorkstationRegistry();
 }

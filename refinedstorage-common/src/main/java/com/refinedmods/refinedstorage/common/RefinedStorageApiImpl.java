@@ -60,6 +60,7 @@ import com.refinedmods.refinedstorage.common.grid.strategy.CompositeGridExtracti
 import com.refinedmods.refinedstorage.common.grid.strategy.CompositeGridInsertionStrategy;
 import com.refinedmods.refinedstorage.common.grid.strategy.CompositeGridScrollingStrategy;
 import com.refinedmods.refinedstorage.common.grid.view.GridResourceRepositoryMapper;
+import com.refinedmods.refinedstorage.common.grid.workstations.CraftingWorkstationRegistryElement;
 import com.refinedmods.refinedstorage.common.networking.CompositeWirelessTransmitterRangeModifier;
 import com.refinedmods.refinedstorage.common.storage.ClientStorageRepository;
 import com.refinedmods.refinedstorage.common.storage.StorageContainerItemHelperImpl;
@@ -185,8 +186,12 @@ public class RefinedStorageApiImpl implements RefinedStorageApi {
     private final WeakHashMap<Level, Map<UUID, Pattern>> patternCache = new WeakHashMap<>();
     private final CompositePatternProviderExternalPatternSinkFactory patternProviderExternalPatternSinkFactory =
         new CompositePatternProviderExternalPatternSinkFactory();
-    private final PlatformRegistry<IWorkstationRegistryElement> workstationRegistry =
+    private final PlatformRegistry<CraftingWorkstationRegistryElement> craftingWorkstationRegistry =
         new PlatformRegistryImpl<>();
+
+    /*TODO
+    private final PlatformRegistry<PatternWorkstationRegistryElement> patternWorkstationRegistry =
+        new PlatformRegistryImpl<>();*/
 
     public RefinedStorageApiImpl() {
         gridSynchronizerRegistry.register(createIdentifier("off"), NoopGridSynchronizer.INSTANCE);
@@ -659,8 +664,14 @@ public class RefinedStorageApiImpl implements RefinedStorageApi {
         return StorageBlockCodecs.STREAM_CODEC;
     }
 
-//    @Override
-//    public PlatformRegistry<IWorkstationRegistryElement> getWorkstationRegistry() {
-//        return workstationRegistry;
-//    }
+    @Override
+    public PlatformRegistry<CraftingWorkstationRegistryElement> getCraftingWorkstationRegistry() {
+        return craftingWorkstationRegistry;
+    }
+
+    /*TODO
+    @Override
+    public PlatformRegistry<PatternWorkstationRegistryElement> getPatternWorkstationRegistry() {
+        return patternWorkstationRegistry;
+    }*/
 }

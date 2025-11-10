@@ -10,6 +10,7 @@ import com.refinedmods.refinedstorage.api.network.security.SecurityNetworkCompon
 import com.refinedmods.refinedstorage.api.network.storage.StorageNetworkComponent;
 import com.refinedmods.refinedstorage.common.api.RefinedStorageApi;
 import com.refinedmods.refinedstorage.common.api.RefinedStorageApiProxy;
+import com.refinedmods.refinedstorage.common.api.grid.workstations.MatrixMenuFactory;
 import com.refinedmods.refinedstorage.common.api.security.PlatformSecurityNetworkComponent;
 import com.refinedmods.refinedstorage.common.api.upgrade.AbstractUpgradeItem;
 import com.refinedmods.refinedstorage.common.autocrafting.CraftingPatternState;
@@ -66,6 +67,7 @@ import com.refinedmods.refinedstorage.common.detector.DetectorBlockEntity;
 import com.refinedmods.refinedstorage.common.detector.DetectorContainerMenu;
 import com.refinedmods.refinedstorage.common.exporter.ExporterContainerMenu;
 import com.refinedmods.refinedstorage.common.exporter.ExporterData;
+import com.refinedmods.refinedstorage.common.grid.CraftingGrid;
 import com.refinedmods.refinedstorage.common.grid.CraftingGridBlockEntity;
 import com.refinedmods.refinedstorage.common.grid.CraftingGridContainerMenu;
 import com.refinedmods.refinedstorage.common.grid.GridBlockEntity;
@@ -74,6 +76,9 @@ import com.refinedmods.refinedstorage.common.grid.GridData;
 import com.refinedmods.refinedstorage.common.grid.PortableGridData;
 import com.refinedmods.refinedstorage.common.grid.WirelessGridContainerMenu;
 import com.refinedmods.refinedstorage.common.grid.WirelessGridData;
+import com.refinedmods.refinedstorage.common.grid.workstations.AbstractCraftingMatrix;
+import com.refinedmods.refinedstorage.common.grid.workstations.CraftingCraftingMatrix;
+import com.refinedmods.refinedstorage.common.grid.workstations.CraftingWorkstationRegistryElement;
 import com.refinedmods.refinedstorage.common.iface.InterfaceBlock;
 import com.refinedmods.refinedstorage.common.iface.InterfaceBlockEntity;
 import com.refinedmods.refinedstorage.common.iface.InterfaceContainerMenu;
@@ -1000,6 +1005,17 @@ public abstract class AbstractModInitializer {
         RefinedStorageApi.INSTANCE.getSlotReferenceFactoryRegistry().register(
             createIdentifier("inventory"),
             InventorySlotReferenceFactory.INSTANCE
+        );
+    }
+
+    protected final void registerCraftingWorkstations() {
+        RefinedStorageApi.INSTANCE.getCraftingWorkstationRegistry().register(
+            createIdentifier("minecraft:crafting"),
+            new CraftingWorkstationRegistryElement(
+                createIdentifier("minecraft:crafting"),
+                new MatrixMenuFactory<CraftingCraftingMatrix, CraftingGrid>,
+                net.minecraft.world.item.Items.CRAFTING_TABLE
+            )
         );
     }
 
