@@ -9,12 +9,14 @@ import com.refinedmods.refinedstorage.common.grid.workstations.AbstractCraftingM
 import com.refinedmods.refinedstorage.common.grid.workstations.AbstractGridResultSlot;
 import com.refinedmods.refinedstorage.common.support.resource.ItemResource;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -32,12 +34,15 @@ public abstract class AbstractCraftingGridContainerMenu extends AbstractGridCont
     @Nullable
     private ResourceRepositoryFilter<GridResource> filterBeforeFilteringBasedOnCraftingMatrixItems;
 
+    private final List<Slot> matrixSlots = new ArrayList<>();
+
     protected AbstractCraftingGridContainerMenu(final MenuType<? extends AbstractGridContainerMenu> menuType,
                                                 final int syncId,
                                                 final Inventory playerInventory,
                                                 final GridData gridData) {
         super(menuType, syncId, playerInventory, gridData);
         this.craftingGrid = new ClientCraftingGrid(playerInventory.player::level);
+        craftingGrid.setActiveMatrix(ResourceLocation.fromNamespaceAndPath("minecraft", "crafting"));
         this.gridPlayer = playerInventory.player;
     }
 
@@ -47,6 +52,7 @@ public abstract class AbstractCraftingGridContainerMenu extends AbstractGridCont
                                                 final CraftingGrid craftingGrid) {
         super(menuType, syncId, playerInventory, craftingGrid);
         this.craftingGrid = craftingGrid;
+        craftingGrid.setActiveMatrix(ResourceLocation.fromNamespaceAndPath("minecraft", "crafting"));
         this.gridPlayer = playerInventory.player;
     }
 
@@ -84,19 +90,46 @@ public abstract class AbstractCraftingGridContainerMenu extends AbstractGridCont
         return super.quickMoveStack(actor, slotIndex);
     }
 
+    //TODO: have matrixSlots list and manage that separately
     @Override
     public void resized(final int playerInventoryY, final int topYStart, final int topYEnd) {
+        resetMatrixSlots();
         super.resized(playerInventoryY, topYStart, topYEnd);
-        craftingGrid.getActiveMatrix().prepRenderers(this, gridPlayer, playerInventoryY, topYStart, topYEnd);
-        getMatrixSlots().forEach(this::addSlot);
+        craftingGrid.getMatrixList().forEach(matrix -> {
+            matrix.prepRenderers(gridPlayer, playerInventoryY, topYStart, topYEnd);
+            matrix.getMatrixSlots().forEach(this::addSlot);
+        });
     }
 
     public List<Slot> getMatrixSlots() {
-        return craftingGrid.getActiveMatrix().getMatrixSlots();
+        return matrixSlots;
+    }
+
+    public void addMatrixSlot(final Slot slot) {
+        matrixSlots.add(slot);
+        super.addSlot(slot);
+    }
+
+    public void resetMatrixSlots() {
+        matrixSlots.clear();
+    }
+
+    public Slot getMatrixSlot(final int slot) {
+        return matrixSlots.get(slot);
     }
 
     public void clear(final boolean toPlayerInventory) {
         craftingGrid.clearMatrix(gridPlayer, toPlayerInventory);
+    }
+
+    public void setWorkstationType(final ResourceLocation workstationid) {
+        craftingGrid.setActiveMatrix(workstationid);
+        if (craftingGrid instanceof CraftingGridBlockEntity) {
+            resized(0, 0, 0);
+        }
+        /*resetSlots();
+        craftingGrid.getActiveMatrix().prepRenderers(gridPlayer, 40, 0, 0);
+        getMatrixSlots().forEach(this::addSlot);*/
     }
 
     @API(status = API.Status.INTERNAL)

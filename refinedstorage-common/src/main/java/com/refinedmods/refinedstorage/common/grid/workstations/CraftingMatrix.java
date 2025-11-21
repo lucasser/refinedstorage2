@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 import net.minecraft.core.NonNullList;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.Slot;
@@ -24,7 +25,8 @@ public class CraftingMatrix {
 
     protected static final int Y_OFFSET_BETWEEN_PLAYER_INVENTORY_AND_FIRST_CRAFTING_MATRIX_SLOT = 69;
 
-    protected static final String WORKSTATION_TYPE = "crafting.crafting";
+    protected static final ResourceLocation WORKSTATION_TYPE =
+        ResourceLocation.fromNamespaceAndPath("minecraft", "crafting");
 
     private static final RecipeType<CraftingRecipe> RECIPE_TYPE = RecipeType.CRAFTING;
 
@@ -33,6 +35,8 @@ public class CraftingMatrix {
     protected final WorkstationRecipeContainer<RecipeMatrixContainer, ResultContainer> recipeContainer;
 
     protected final Supplier<Level> levelSupplier;
+
+    protected boolean active = false;
 
     @Nullable
     protected RecipeHolder<CraftingRecipe> currentRecipe;

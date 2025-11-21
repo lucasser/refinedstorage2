@@ -53,15 +53,6 @@ public class WorkstationRecipeContainer<T extends Container, E extends Container
         }
     }
 
-    public void updateResult(final T resultContainer) {
-        if (outputContainer == null) {
-            return;
-        }
-        for (int i = 0; i < resultContainer.getContainerSize(); i++) {
-            outputContainer.setItem(i, resultContainer.getItem(i));
-        }
-    }
-
     public boolean clearToPlayerInventory(final Player player) {
         boolean clearedAll = true;
         for (int i = 0; i < getInput().getContainerSize(); ++i) {

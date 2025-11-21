@@ -57,6 +57,10 @@ public final class C2SPackets {
         Platform.INSTANCE.sendPacketToServer(new CraftingGridRecipeTransferPacket(recipe));
     }
 
+    public static void sendCraftingGridWorkstationChange(final ResourceLocation workstationid) {
+        Platform.INSTANCE.sendPacketToServer(new CraftingGridWorkstationChangePacket(workstationid.toString()));
+    }
+
     public static <T> void sendPropertyChange(final PropertyType<T> type, final T value) {
         Platform.INSTANCE.sendPacketToServer(new PropertyChangePacket(type.id(), type.serializer().apply(value)));
     }

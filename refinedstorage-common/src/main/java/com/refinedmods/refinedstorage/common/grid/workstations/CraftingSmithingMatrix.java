@@ -3,7 +3,7 @@ package com.refinedmods.refinedstorage.common.grid.workstations;
 import com.refinedmods.refinedstorage.api.core.NullableType;
 import com.refinedmods.refinedstorage.api.storage.root.RootStorage;
 import com.refinedmods.refinedstorage.common.autocrafting.VanillaConstants;
-import com.refinedmods.refinedstorage.common.grid.AbstractGridContainerMenu;
+import com.refinedmods.refinedstorage.common.grid.AbstractCraftingGridContainerMenu;
 import com.refinedmods.refinedstorage.common.grid.CraftingGrid;
 import com.refinedmods.refinedstorage.common.grid.ExtractTransaction;
 import com.refinedmods.refinedstorage.common.support.RecipeMatrixContainer;
@@ -11,6 +11,7 @@ import com.refinedmods.refinedstorage.common.support.resource.ItemResource;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -26,6 +27,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingInput;
@@ -41,12 +43,16 @@ public class CraftingSmithingMatrix extends SmithingMatrix implements AbstractCr
     @Nullable
     private SmithingGridResultSlot resultSlot;
 
-    private final CraftingGrid craftingGrid;
+    @Nullable
+    private CraftingGrid craftingGrid;
 
     public CraftingSmithingMatrix(@Nullable final Runnable listener,
-                                  final Supplier<@NullableType Level> levelSupplier,
-                                  final CraftingGrid craftingGrid) {
+                                  final Supplier<@NullableType Level> levelSupplier) {
         super(listener, levelSupplier);
+    }
+
+    @Override
+    public void setCraftingGrid(final CraftingGrid craftingGrid) {
         this.craftingGrid = craftingGrid;
     }
 
@@ -68,18 +74,16 @@ public class CraftingSmithingMatrix extends SmithingMatrix implements AbstractCr
     }
 
     @Override
-    public void prepRenderers(final AbstractGridContainerMenu menu,
-                              final Player gridPlayer,
+    public void prepRenderers(final Player gridPlayer,
                               final int playerInventoryY,
                               final int topYStart,
                               final int topYEnd) {
         final int y = playerInventoryY - Y_OFFSET_BETWEEN_PLAYER_INVENTORY_AND_SMITHING_TABLE_SLOTS;
-        prepSlots(menu, gridPlayer, y, topYStart, topYEnd);
+        prepSlots(gridPlayer, y, topYStart, topYEnd);
         prepArmourStand();
     }
 
-    private void prepSlots(final AbstractGridContainerMenu menu,
-                      final Player gridPlayer,
+    private void prepSlots(final Player gridPlayer,
                       final int y,
                       final int topYStart,
                       final int topYEnd) {
@@ -96,13 +100,23 @@ public class CraftingSmithingMatrix extends SmithingMatrix implements AbstractCr
                         default -> true;
                     });
                 }
+
+                @Override
+                public boolean isActive() {
+                    return active;
+                }
             });
         }
-        resultSlot = new SmithingGridResultSlot(gridPlayer, this, 98, y);
+        resultSlot = new SmithingGridResultSlot(gridPlayer, this, 98, y) {
+            @Override
+            public boolean isActive() {
+                return active;
+            }
+        };
     }
 
     @Override
-    public void render(final AbstractGridContainerMenu menu, final GuiGraphics graphics,
+    public void render(final AbstractContainerMenu menu, final GuiGraphics graphics,
                        final float partialTicks, final int mouseX, final int mouseY,
                        final int topX, final int topY, final int insertY) {
         renderIcons(menu, graphics, partialTicks, topX, topY);
@@ -144,7 +158,7 @@ public class CraftingSmithingMatrix extends SmithingMatrix implements AbstractCr
     }
 
     @Override
-    public String getWorkstationType() {
+    public ResourceLocation getWorkstationType() {
         return WORKSTATION_TYPE;
     }
 
@@ -176,7 +190,7 @@ public class CraftingSmithingMatrix extends SmithingMatrix implements AbstractCr
 
     @Override
     public ExtractTransaction startExtractTransaction(final Player player, final boolean b) {
-        return craftingGrid.startExtractTransaction(player, b);
+        return Objects.requireNonNull(craftingGrid).startExtractTransaction(player, b);
     }
 
     @Override
@@ -201,5 +215,10 @@ public class CraftingSmithingMatrix extends SmithingMatrix implements AbstractCr
 
     public void updateMatrixAndNotifyListenerLater(final Runnable runnable) {
         recipeContainer.updateMatrixAndNotifyListenerLater(runnable);
+    }
+
+    @Override
+    public void setActive(final boolean active) {
+        this.active = active;
     }
 }

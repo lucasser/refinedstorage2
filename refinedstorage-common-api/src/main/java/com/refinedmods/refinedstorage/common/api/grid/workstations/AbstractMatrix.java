@@ -1,8 +1,4 @@
-package com.refinedmods.refinedstorage.common.grid.workstations;
-
-import com.refinedmods.refinedstorage.api.storage.root.RootStorage;
-import com.refinedmods.refinedstorage.common.grid.AbstractGridContainerMenu;
-import com.refinedmods.refinedstorage.common.support.resource.ItemResource;
+package com.refinedmods.refinedstorage.common.api.grid.workstations;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +13,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 
 public interface AbstractMatrix {
@@ -31,8 +28,7 @@ public interface AbstractMatrix {
     /**
      * Preps various elements to be rendered: slots, smithing table armour stand, scrollbar
      * */
-    void prepRenderers(AbstractGridContainerMenu menu,
-                       Player gridPlayer,
+    void prepRenderers(Player gridPlayer,
                        int playerInventoryY,
                        int topYStart,
                        int topYEnd);
@@ -40,7 +36,7 @@ public interface AbstractMatrix {
     /**
      * Actually display all the elements
      * */
-    void render(AbstractGridContainerMenu menu,
+    void render(AbstractContainerMenu menu,
                 GuiGraphics graphics,
                 float partialTicks,
                 int mouseX,
@@ -68,7 +64,7 @@ public interface AbstractMatrix {
 
     Optional<Container> getResult();
 
-    String getWorkstationType();
+    ResourceLocation getWorkstationType();
 
     CompoundTag writeToTag(HolderLookup.Provider provider);
 
@@ -76,13 +72,11 @@ public interface AbstractMatrix {
 
     void changed();
 
-    void transferRecipe(Player player,
-                        @Nullable RootStorage rootStorage,
-                        List<List<ItemResource>> recipe);
-
     void updateMatrixAndNotifyListenerLater(Runnable runnable);
 
     void tick();
 
     void levelChanged();
+
+    void setActive(boolean active);
 }

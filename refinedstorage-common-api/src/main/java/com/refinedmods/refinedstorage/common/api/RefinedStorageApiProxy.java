@@ -22,6 +22,8 @@ import com.refinedmods.refinedstorage.common.api.grid.strategy.GridInsertionStra
 import com.refinedmods.refinedstorage.common.api.grid.strategy.GridScrollingStrategy;
 import com.refinedmods.refinedstorage.common.api.grid.strategy.GridScrollingStrategyFactory;
 import com.refinedmods.refinedstorage.common.api.grid.view.GridResource;
+import com.refinedmods.refinedstorage.common.api.grid.workstations.MatrixMenuFactory;
+import com.refinedmods.refinedstorage.common.api.grid.workstations.WorkstationRegistry;
 import com.refinedmods.refinedstorage.common.api.importer.ImporterTransferStrategyFactory;
 import com.refinedmods.refinedstorage.common.api.security.PlatformPermission;
 import com.refinedmods.refinedstorage.common.api.storage.StorageBlockData;
@@ -450,6 +452,11 @@ public class RefinedStorageApiProxy implements RefinedStorageApi {
     @Override
     public StreamCodec<RegistryFriendlyByteBuf, StorageBlockData> getStorageBlockDataStreamCodec() {
         return ensureLoaded().getStorageBlockDataStreamCodec();
+    }
+
+    @Override
+    public WorkstationRegistry<MatrixMenuFactory> getCraftingWorkstationRegistry() {
+        return ensureLoaded().getCraftingWorkstationRegistry();
     }
 
     private RefinedStorageApi ensureLoaded() {

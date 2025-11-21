@@ -39,6 +39,7 @@ import com.refinedmods.refinedstorage.common.support.packet.c2s.AutocraftingPrev
 import com.refinedmods.refinedstorage.common.support.packet.c2s.AutocraftingRequestPacket;
 import com.refinedmods.refinedstorage.common.support.packet.c2s.CraftingGridClearPacket;
 import com.refinedmods.refinedstorage.common.support.packet.c2s.CraftingGridRecipeTransferPacket;
+import com.refinedmods.refinedstorage.common.support.packet.c2s.CraftingGridWorkstationChangePacket;
 import com.refinedmods.refinedstorage.common.support.packet.c2s.FilterSlotChangePacket;
 import com.refinedmods.refinedstorage.common.support.packet.c2s.GridExtractPacket;
 import com.refinedmods.refinedstorage.common.support.packet.c2s.GridInsertPacket;
@@ -604,6 +605,10 @@ public class ModInitializerImpl extends AbstractModInitializer implements ModIni
             CraftingGridRecipeTransferPacket.PACKET_TYPE,
             CraftingGridRecipeTransferPacket.STREAM_CODEC
         );
+        PayloadTypeRegistry.playC2S().register(
+            CraftingGridWorkstationChangePacket.PACKET_TYPE,
+            CraftingGridWorkstationChangePacket.STREAM_CODEC
+        );
         PayloadTypeRegistry.playC2S().register(GridExtractPacket.PACKET_TYPE, GridExtractPacket.STREAM_CODEC);
         PayloadTypeRegistry.playC2S().register(GridInsertPacket.PACKET_TYPE, GridInsertPacket.STREAM_CODEC);
         PayloadTypeRegistry.playC2S().register(GridScrollPacket.PACKET_TYPE, GridScrollPacket.STREAM_CODEC);
@@ -734,6 +739,10 @@ public class ModInitializerImpl extends AbstractModInitializer implements ModIni
         ServerPlayNetworking.registerGlobalReceiver(
             CraftingGridRecipeTransferPacket.PACKET_TYPE,
             wrapHandler(CraftingGridRecipeTransferPacket::handle)
+        );
+        ServerPlayNetworking.registerGlobalReceiver(
+            CraftingGridWorkstationChangePacket.PACKET_TYPE,
+            wrapHandler(CraftingGridWorkstationChangePacket::handle)
         );
         ServerPlayNetworking.registerGlobalReceiver(
             PropertyChangePacket.PACKET_TYPE,

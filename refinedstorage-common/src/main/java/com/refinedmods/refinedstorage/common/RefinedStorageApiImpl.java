@@ -20,7 +20,6 @@ import com.refinedmods.refinedstorage.common.api.constructordestructor.Destructo
 import com.refinedmods.refinedstorage.common.api.exporter.ExporterTransferStrategyFactory;
 import com.refinedmods.refinedstorage.common.api.grid.Grid;
 import com.refinedmods.refinedstorage.common.api.grid.GridSynchronizer;
-import com.refinedmods.refinedstorage.common.api.grid.workstations.IWorkstationRegistryElement;
 import com.refinedmods.refinedstorage.common.api.grid.strategy.GridExtractionStrategy;
 import com.refinedmods.refinedstorage.common.api.grid.strategy.GridExtractionStrategyFactory;
 import com.refinedmods.refinedstorage.common.api.grid.strategy.GridInsertionStrategy;
@@ -28,6 +27,8 @@ import com.refinedmods.refinedstorage.common.api.grid.strategy.GridInsertionStra
 import com.refinedmods.refinedstorage.common.api.grid.strategy.GridScrollingStrategy;
 import com.refinedmods.refinedstorage.common.api.grid.strategy.GridScrollingStrategyFactory;
 import com.refinedmods.refinedstorage.common.api.grid.view.GridResource;
+import com.refinedmods.refinedstorage.common.api.grid.workstations.MatrixMenuFactory;
+import com.refinedmods.refinedstorage.common.api.grid.workstations.WorkstationRegistry;
 import com.refinedmods.refinedstorage.common.api.importer.ImporterTransferStrategyFactory;
 import com.refinedmods.refinedstorage.common.api.security.PlatformPermission;
 import com.refinedmods.refinedstorage.common.api.storage.StorageBlockData;
@@ -60,7 +61,8 @@ import com.refinedmods.refinedstorage.common.grid.strategy.CompositeGridExtracti
 import com.refinedmods.refinedstorage.common.grid.strategy.CompositeGridInsertionStrategy;
 import com.refinedmods.refinedstorage.common.grid.strategy.CompositeGridScrollingStrategy;
 import com.refinedmods.refinedstorage.common.grid.view.GridResourceRepositoryMapper;
-import com.refinedmods.refinedstorage.common.grid.workstations.CraftingWorkstationRegistryElement;
+import com.refinedmods.refinedstorage.common.grid.workstations.AbstractCraftingMatrix;
+import com.refinedmods.refinedstorage.common.grid.workstations.WorkstationRegistryImpl;
 import com.refinedmods.refinedstorage.common.networking.CompositeWirelessTransmitterRangeModifier;
 import com.refinedmods.refinedstorage.common.storage.ClientStorageRepository;
 import com.refinedmods.refinedstorage.common.storage.StorageContainerItemHelperImpl;
@@ -186,8 +188,8 @@ public class RefinedStorageApiImpl implements RefinedStorageApi {
     private final WeakHashMap<Level, Map<UUID, Pattern>> patternCache = new WeakHashMap<>();
     private final CompositePatternProviderExternalPatternSinkFactory patternProviderExternalPatternSinkFactory =
         new CompositePatternProviderExternalPatternSinkFactory();
-    private final PlatformRegistry<CraftingWorkstationRegistryElement> craftingWorkstationRegistry =
-        new PlatformRegistryImpl<>();
+    private final WorkstationRegistry<MatrixMenuFactory> craftingWorkstationRegistry =
+        new WorkstationRegistryImpl<>();
 
     /*TODO
     private final PlatformRegistry<PatternWorkstationRegistryElement> patternWorkstationRegistry =
@@ -665,7 +667,7 @@ public class RefinedStorageApiImpl implements RefinedStorageApi {
     }
 
     @Override
-    public PlatformRegistry<CraftingWorkstationRegistryElement> getCraftingWorkstationRegistry() {
+    public WorkstationRegistry<MatrixMenuFactory> getCraftingWorkstationRegistry() {
         return craftingWorkstationRegistry;
     }
 

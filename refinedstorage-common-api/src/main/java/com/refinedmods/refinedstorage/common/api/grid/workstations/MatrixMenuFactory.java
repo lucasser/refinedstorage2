@@ -10,10 +10,9 @@ import org.apiguardian.api.API;
 
 @API(status = API.Status.EXPERIMENTAL)
 @FunctionalInterface
-public interface MatrixMenuFactory<T, E> {
-    T create(@Nullable Runnable listener,
-             Supplier<@NullableType Level> levelSupplier,
-             E parent
+public interface MatrixMenuFactory {
+    AbstractMatrix create(@Nullable Runnable listener,
+             Supplier<@NullableType Level> levelSupplier
     );
 }
 

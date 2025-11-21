@@ -1,13 +1,17 @@
 package com.refinedmods.refinedstorage.common.grid.screen;
 
 import com.refinedmods.refinedstorage.common.Platform;
+import com.refinedmods.refinedstorage.common.api.RefinedStorageApi;
 import com.refinedmods.refinedstorage.common.content.KeyMappings;
 import com.refinedmods.refinedstorage.common.grid.AbstractCraftingGridContainerMenu;
 import com.refinedmods.refinedstorage.common.grid.CraftingGridMatrixCloseBehavior;
+import com.refinedmods.refinedstorage.common.grid.workstations.SwitchWorkstationButton;
 import com.refinedmods.refinedstorage.common.support.tooltip.HelpClientTooltipComponent;
 import com.refinedmods.refinedstorage.common.support.widget.CustomButton;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.annotation.Nullable;
 
 import net.minecraft.ChatFormatting;
@@ -51,6 +55,8 @@ public class CraftingGridScreen extends AbstractGridScreen<AbstractCraftingGridC
 
     private boolean filteringBasedOnCraftingMatrixItems;
 
+    private final Map<ResourceLocation, SwitchWorkstationButton> workstationButtons = new HashMap<>();
+
     public CraftingGridScreen(final AbstractCraftingGridContainerMenu menu,
                               final Inventory inventory,
                               final Component title) {
@@ -71,8 +77,9 @@ public class CraftingGridScreen extends AbstractGridScreen<AbstractCraftingGridC
         setClearToNetworkButtonActive(getMenu().isActive());
         getMenu().setActivenessListener(this::setClearToNetworkButtonActive);
         addRenderableWidget(clearToNetworkButton);
+        addWorkstationSwitchButtons(getMenu().getMatrix().getWorkstationType());
         addRenderableWidget(createClearButton(clearToInventoryButtonX, clearButtonY, true));
-        getMenu().getMatrix().addWidgets(this::addWidget, this::addRenderableWidget);
+        //getMenu().getMatrix().addWidgets(this::addWidget, this::addRenderableWidget);
     }
 
     private int getClearButtonX(final int i) {
@@ -88,12 +95,19 @@ public class CraftingGridScreen extends AbstractGridScreen<AbstractCraftingGridC
         final int x = (width - imageWidth) / 2;
         final int y = (height - imageHeight) / 2;
         final int insertY = topPos + imageHeight - getInventoryHeight();
+        //renderMatrixSlots(graphics);
         getMenu().getMatrix().render(menu, graphics, delta, mouseX, mouseY, x, y, insertY);
     }
 
     @Override
     protected ResourceLocation getInsertTexture() {
         return getMenu().getMatrix().getInsert();
+    }
+
+    protected void renderMatrixSlots(final GuiGraphics graphics) {
+        for (final Slot slot : menu.getMatrixSlots()) {
+            renderSlot(graphics, slot);
+        }
     }
 
     private void renderCraftingMatrixFilteringHighlights(final GuiGraphics graphics) {
@@ -176,6 +190,28 @@ public class CraftingGridScreen extends AbstractGridScreen<AbstractCraftingGridC
     @Nullable
     private KeyMapping wrapUnbound(@Nullable final KeyMapping keyMapping) {
         return keyMapping == null || keyMapping.isUnbound() ? null : keyMapping;
+    }
+
+    private void addWorkstationSwitchButtons(final ResourceLocation currentWorkstation) {
+        final List<ResourceLocation> workstationTypes =
+            RefinedStorageApi.INSTANCE.getCraftingWorkstationRegistry().getAllIds();
+
+        for (int i = 0; i < workstationTypes.size(); ++i) {
+            final ResourceLocation workstation = workstationTypes.get(i);
+            final SwitchWorkstationButton button = new SwitchWorkstationButton(
+                leftPos + 172,
+                topPos + imageHeight - getInventoryHeight() - getInsertHeight() + 4 + (i * (16 + 3)),
+                btn -> {
+                    getMenu().setWorkstationType(workstation);
+                    //resize();
+                },
+                workstation,
+                RefinedStorageApi.INSTANCE.getCraftingWorkstationRegistry().getIcon(workstation).get(),
+                workstation == currentWorkstation
+            );
+            workstationButtons.put(workstation, button);
+            addRenderableWidget(button);
+        }
     }
 
     @Override

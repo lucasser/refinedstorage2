@@ -4,20 +4,17 @@ import com.refinedmods.refinedstorage.api.core.Action;
 import com.refinedmods.refinedstorage.api.network.Network;
 import com.refinedmods.refinedstorage.api.network.storage.StorageNetworkComponent;
 import com.refinedmods.refinedstorage.common.Platform;
+import com.refinedmods.refinedstorage.common.api.grid.workstations.AbstractMatrix;
 import com.refinedmods.refinedstorage.common.api.storage.PlayerActor;
 import com.refinedmods.refinedstorage.common.content.BlockEntities;
 import com.refinedmods.refinedstorage.common.content.ContentNames;
 import com.refinedmods.refinedstorage.common.grid.workstations.AbstractCraftingMatrix;
-import com.refinedmods.refinedstorage.common.grid.workstations.AbstractMatrix;
-import com.refinedmods.refinedstorage.common.grid.workstations.CraftingCraftingMatrix;
-import com.refinedmods.refinedstorage.common.grid.workstations.CraftingSmithingMatrix;
-import com.refinedmods.refinedstorage.common.grid.workstations.WorkstationList;
+import com.refinedmods.refinedstorage.common.grid.workstations.CraftingWorkstationList;
 import com.refinedmods.refinedstorage.common.support.BlockEntityWithDrops;
 import com.refinedmods.refinedstorage.common.support.containermenu.NetworkNodeExtendedMenuProvider;
 import com.refinedmods.refinedstorage.common.support.resource.ItemResource;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
@@ -28,6 +25,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamEncoder;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -41,7 +39,7 @@ public class CraftingGridBlockEntity extends AbstractGridBlockEntity implements 
     private static final String TAG_WORKSTATION_LIST = "workstations";
     private static final String TAG_WORKSTATION_AMOUNT = "workstation_amount";
 
-    private final WorkstationList<AbstractCraftingMatrix> matrixList = new WorkstationList<>();
+    private final CraftingWorkstationList matrixList = new CraftingWorkstationList();
 
     @Nullable
     private AbstractCraftingMatrix activeMatrix;
@@ -53,22 +51,18 @@ public class CraftingGridBlockEntity extends AbstractGridBlockEntity implements 
             state,
             Platform.INSTANCE.getConfig().getCraftingGrid().getEnergyUsage()
         );
-        matrixList.add(new CraftingSmithingMatrix(
-            this::setChanged,
-            this::getLevel,
-            this
-        ));
-        matrixList.add(new CraftingCraftingMatrix(
-            this::setChanged,
-            this::getLevel,
-            this
-        ));
-        activeMatrix = matrixList.getById("crafting.crafting");
+
+        matrixList.initialize(this::setChanged, this::getLevel);
     }
 
     @Override
     public AbstractCraftingMatrix getActiveMatrix() {
         return activeMatrix;
+    }
+
+    @Override
+    public CraftingWorkstationList getMatrixList() {
+        return matrixList;
     }
 
     @Override
@@ -136,6 +130,15 @@ public class CraftingGridBlockEntity extends AbstractGridBlockEntity implements 
     }
 
     @Override
+    public void setActiveMatrix(final ResourceLocation workstationid) {
+        if (activeMatrix != null) {
+            activeMatrix.setActive(false);
+        }
+        activeMatrix = matrixList.getById(workstationid);
+        activeMatrix.setActive(true);
+    }
+
+    @Override
     public GridData getMenuData() {
         return GridData.of(this);
     }
@@ -162,7 +165,7 @@ public class CraftingGridBlockEntity extends AbstractGridBlockEntity implements 
         super.saveAdditional(tag, provider);
         final CompoundTag workstationList = new CompoundTag();
         matrixList.forEach(matrix -> {
-            workstationList.put(matrix.getWorkstationType(), matrix.writeToTag(provider));
+            workstationList.put(matrix.getWorkstationType().toString(), matrix.writeToTag(provider));
         });
         tag.put(TAG_WORKSTATION_LIST, workstationList);
         tag.putInt(TAG_WORKSTATION_AMOUNT, matrixList.size());
@@ -180,37 +183,13 @@ public class CraftingGridBlockEntity extends AbstractGridBlockEntity implements 
 
     //TODO: foreach workstation in registry
     private void makeWorkstationList(final CompoundTag tag, final HolderLookup.Provider provider) {
-        if (tag.contains("crafting.crafting")) {
-            AbstractCraftingMatrix matrix;
-            try {
-                matrix = matrixList.getById("crafting.crafting");
-            } catch (NoSuchElementException e) {
-                matrix = new CraftingCraftingMatrix(
-                    this::setChanged,
-                    this::getLevel,
-                    this
-                );
+        matrixList.forEach(matrix -> {
+            if (tag.contains(matrix.getWorkstationType().toString())) {
+                matrix.readFromTag(tag.getCompound(matrix.getWorkstationType().toString()), provider);
+                matrix.setCraftingGrid(this);
             }
-            matrix.readFromTag(tag.getCompound("crafting.crafting"), provider);
-            matrixList.add(matrix);
-        }
-
-        if (tag.contains("crafting.smithing")) {
-            AbstractCraftingMatrix matrix;
-            try {
-                matrix = matrixList.getById("crafting.smithing");
-            } catch (NoSuchElementException e) {
-                matrix = new CraftingSmithingMatrix(
-                    this::setChanged,
-                    this::getLevel,
-                    this
-                );
-            }
-            matrix.readFromTag(tag.getCompound("crafting.smithing"), provider);
-            matrixList.add(matrix);
-        }
-
-        activeMatrix = matrixList.getById("crafting.crafting");
+        });
+        //setActiveMatrix(ResourceLocation.fromNamespaceAndPath("minecraft", "smithing"));
     }
 
     @Override

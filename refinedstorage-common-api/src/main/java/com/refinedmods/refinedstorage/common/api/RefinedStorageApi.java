@@ -15,7 +15,6 @@ import com.refinedmods.refinedstorage.common.api.constructordestructor.Destructo
 import com.refinedmods.refinedstorage.common.api.exporter.ExporterTransferStrategyFactory;
 import com.refinedmods.refinedstorage.common.api.grid.Grid;
 import com.refinedmods.refinedstorage.common.api.grid.GridSynchronizer;
-import com.refinedmods.refinedstorage.common.api.grid.workstations.IWorkstationRegistryElement;
 import com.refinedmods.refinedstorage.common.api.grid.strategy.GridExtractionStrategy;
 import com.refinedmods.refinedstorage.common.api.grid.strategy.GridExtractionStrategyFactory;
 import com.refinedmods.refinedstorage.common.api.grid.strategy.GridInsertionStrategy;
@@ -23,6 +22,8 @@ import com.refinedmods.refinedstorage.common.api.grid.strategy.GridInsertionStra
 import com.refinedmods.refinedstorage.common.api.grid.strategy.GridScrollingStrategy;
 import com.refinedmods.refinedstorage.common.api.grid.strategy.GridScrollingStrategyFactory;
 import com.refinedmods.refinedstorage.common.api.grid.view.GridResource;
+import com.refinedmods.refinedstorage.common.api.grid.workstations.MatrixMenuFactory;
+import com.refinedmods.refinedstorage.common.api.grid.workstations.WorkstationRegistry;
 import com.refinedmods.refinedstorage.common.api.importer.ImporterTransferStrategyFactory;
 import com.refinedmods.refinedstorage.common.api.security.PlatformPermission;
 import com.refinedmods.refinedstorage.common.api.storage.StorageBlockData;
@@ -235,5 +236,5 @@ public interface RefinedStorageApi {
 
     StreamCodec<RegistryFriendlyByteBuf, StorageBlockData> getStorageBlockDataStreamCodec();
 
-    PlatformRegistry<? extends IWorkstationRegistryElement<?, ?>> getCraftingWorkstationRegistry();
+    WorkstationRegistry<MatrixMenuFactory> getCraftingWorkstationRegistry();
 }

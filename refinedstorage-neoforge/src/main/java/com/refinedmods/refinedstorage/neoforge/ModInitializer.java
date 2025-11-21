@@ -40,6 +40,7 @@ import com.refinedmods.refinedstorage.common.support.packet.c2s.AutocraftingPrev
 import com.refinedmods.refinedstorage.common.support.packet.c2s.AutocraftingRequestPacket;
 import com.refinedmods.refinedstorage.common.support.packet.c2s.CraftingGridClearPacket;
 import com.refinedmods.refinedstorage.common.support.packet.c2s.CraftingGridRecipeTransferPacket;
+import com.refinedmods.refinedstorage.common.support.packet.c2s.CraftingGridWorkstationChangePacket;
 import com.refinedmods.refinedstorage.common.support.packet.c2s.FilterSlotChangePacket;
 import com.refinedmods.refinedstorage.common.support.packet.c2s.GridExtractPacket;
 import com.refinedmods.refinedstorage.common.support.packet.c2s.GridInsertPacket;
@@ -842,6 +843,11 @@ public class ModInitializer extends AbstractModInitializer {
             CraftingGridRecipeTransferPacket.PACKET_TYPE,
             CraftingGridRecipeTransferPacket.STREAM_CODEC,
             wrapHandler(CraftingGridRecipeTransferPacket::handle)
+        );
+        registrar.playToServer(
+            CraftingGridWorkstationChangePacket.PACKET_TYPE,
+            CraftingGridWorkstationChangePacket.STREAM_CODEC,
+            wrapHandler(CraftingGridWorkstationChangePacket::handle)
         );
         registrar.playToServer(
             GridExtractPacket.PACKET_TYPE,

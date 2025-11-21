@@ -13,9 +13,7 @@ import com.refinedmods.refinedstorage.api.storage.TrackedResourceAmount;
 import com.refinedmods.refinedstorage.common.api.support.resource.PlatformResourceKey;
 import com.refinedmods.refinedstorage.common.api.support.resource.ResourceType;
 import com.refinedmods.refinedstorage.common.grid.workstations.AbstractCraftingMatrix;
-import com.refinedmods.refinedstorage.common.grid.workstations.CraftingCraftingMatrix;
-import com.refinedmods.refinedstorage.common.grid.workstations.CraftingMatrix;
-import com.refinedmods.refinedstorage.common.grid.workstations.CraftingSmithingMatrix;
+import com.refinedmods.refinedstorage.common.grid.workstations.CraftingWorkstationList;
 import com.refinedmods.refinedstorage.common.support.packet.c2s.C2SPackets;
 import com.refinedmods.refinedstorage.common.support.resource.ItemResource;
 
@@ -24,8 +22,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
+import javax.annotation.Nullable;
 
 import net.minecraft.core.NonNullList;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
@@ -34,26 +34,33 @@ import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.level.Level;
 
 class ClientCraftingGrid implements CraftingGrid {
-    private final AbstractCraftingMatrix craftingMatrix;
+
+    private final CraftingWorkstationList matrixList = new CraftingWorkstationList();
+
+    @Nullable
+    private AbstractCraftingMatrix activeMatrix;
+
+    private final Supplier<Level> levelSupplier;
 
     ClientCraftingGrid(final Supplier<Level> levelSupplier) {
-        this.craftingMatrix = new CraftingCraftingMatrix(
-            null,
-            levelSupplier,
-            this
-        );
-        craftingMatrix.levelChanged();
+        this.levelSupplier = levelSupplier;
+        matrixList.initialize(null, levelSupplier);
     }
 
     @Override
     public AbstractCraftingMatrix getActiveMatrix() {
-        return craftingMatrix;
+        return activeMatrix;
+    }
+
+    @Override
+    public CraftingWorkstationList getMatrixList() {
+        return matrixList;
     }
 
     //TODO: problem
     @Override
     public Optional<Container> getResult() {
-        return craftingMatrix.getResult();
+        return activeMatrix.getResult();
     }
 
     @Override
@@ -80,6 +87,20 @@ class ClientCraftingGrid implements CraftingGrid {
     @Override
     public void acceptQuickCraft(final Player player, final ItemStack craftedStack) {
         throw new UnsupportedOperationException();
+    }
+
+    //TODO: delete slots when switching?
+    @Override
+    public void setActiveMatrix(final ResourceLocation workstationid) {
+        if (activeMatrix != null) {
+            activeMatrix.setActive(false);
+        }
+        activeMatrix = matrixList.getById(workstationid);
+        activeMatrix.setCraftingGrid(this);
+        activeMatrix.setActive(true);
+        activeMatrix.changed();
+        activeMatrix.levelChanged();
+        C2SPackets.sendCraftingGridWorkstationChange(workstationid);
     }
 
     @Override

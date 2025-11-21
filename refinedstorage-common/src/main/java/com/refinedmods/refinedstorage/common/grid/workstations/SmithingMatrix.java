@@ -2,7 +2,6 @@ package com.refinedmods.refinedstorage.common.grid.workstations;
 
 import com.refinedmods.refinedstorage.api.core.NullableType;
 import com.refinedmods.refinedstorage.common.autocrafting.VanillaConstants;
-import com.refinedmods.refinedstorage.common.grid.AbstractGridContainerMenu;
 import com.refinedmods.refinedstorage.common.support.RecipeMatrixContainer;
 import com.refinedmods.refinedstorage.common.util.ClientPlatformUtil;
 
@@ -16,13 +15,14 @@ import javax.annotation.Nullable;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.screens.inventory.CyclingSlotBackground;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ArmorItem;
@@ -39,7 +39,8 @@ import net.minecraft.world.level.Level;
 public class SmithingMatrix {
     protected static final int Y_OFFSET_BETWEEN_PLAYER_INVENTORY_AND_SMITHING_TABLE_SLOTS = 32;
 
-    protected static final String WORKSTATION_TYPE = "crafting.smithing";
+    protected static final ResourceLocation WORKSTATION_TYPE =
+        ResourceLocation.fromNamespaceAndPath("minecraft", "smithing");
 
     private static final RecipeType<SmithingRecipe> RECIPE_TYPE = RecipeType.SMITHING;
 
@@ -58,10 +59,12 @@ public class SmithingMatrix {
     @Nullable
     protected ArmorStand preview;
 
+    protected boolean active;
+
     //TODO: may cause problems if inventory is overwritten to have a different size
-    private final CyclingSlotBackground templateIcon = new CyclingSlotBackground(36);
-    private final CyclingSlotBackground baseIcon = new CyclingSlotBackground(37);
-    private final CyclingSlotBackground additionalIcon = new CyclingSlotBackground(38);
+    private final GridCyclingSlotBackground templateIcon = new GridCyclingSlotBackground(0);
+    private final GridCyclingSlotBackground baseIcon = new GridCyclingSlotBackground(1);
+    private final GridCyclingSlotBackground additionalIcon = new GridCyclingSlotBackground(2);
 
     public SmithingMatrix(@Nullable final Runnable listener, final Supplier<@NullableType Level> levelSupplier) {
         this.levelSupplier = levelSupplier;
@@ -131,11 +134,11 @@ public class SmithingMatrix {
         return NonNullList.withSize(input.size(), ItemStack.EMPTY);
     }
 
-    protected void renderIcons(final AbstractGridContainerMenu menu, final GuiGraphics graphics,
+    protected void renderIcons(final AbstractContainerMenu menu, final GuiGraphics graphics,
                                final float partialTicks, final int leftPos, final int topPos) {
-        templateIcon.render(menu, graphics, partialTicks, leftPos, topPos);
-        baseIcon.render(menu, graphics, partialTicks, leftPos, topPos);
-        additionalIcon.render(menu, graphics, partialTicks, leftPos, topPos);
+        templateIcon.render(matrixSlots.get(templateIcon.getSlotIndex()), graphics, partialTicks, leftPos, topPos);
+        baseIcon.render(matrixSlots.get(baseIcon.getSlotIndex()), graphics, partialTicks, leftPos, topPos);
+        additionalIcon.render(matrixSlots.get(additionalIcon.getSlotIndex()), graphics, partialTicks, leftPos, topPos);
     }
 
     Optional<SmithingTemplateItem> getSmithingTableTemplateItem() {
