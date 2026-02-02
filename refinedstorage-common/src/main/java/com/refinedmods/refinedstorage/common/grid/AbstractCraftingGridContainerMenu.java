@@ -95,10 +95,12 @@ public abstract class AbstractCraftingGridContainerMenu extends AbstractGridCont
     public void resized(final int playerInventoryY, final int topYStart, final int topYEnd) {
         resetMatrixSlots();
         super.resized(playerInventoryY, topYStart, topYEnd);
-        craftingGrid.getMatrixList().forEach(matrix -> {
-            matrix.prepRenderers(gridPlayer, playerInventoryY, topYStart, topYEnd);
-            matrix.getMatrixSlots().forEach(this::addSlot);
-        });
+        craftingGrid.getActiveMatrix().prepRenderers(gridPlayer, playerInventoryY, topYStart, topYEnd);
+        craftingGrid.getActiveMatrix().getMatrixSlots().forEach(this::addSlot);
+//        craftingGrid.getMatrixList().forEach(matrix -> {
+//            matrix.prepRenderers(gridPlayer, playerInventoryY, topYStart, topYEnd);
+//            matrix.getMatrixSlots().forEach(this::addSlot);
+//        });
     }
 
     public List<Slot> getMatrixSlots() {

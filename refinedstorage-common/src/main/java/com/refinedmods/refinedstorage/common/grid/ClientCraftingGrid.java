@@ -97,9 +97,9 @@ class ClientCraftingGrid implements CraftingGrid {
         }
         activeMatrix = matrixList.getById(workstationid);
         activeMatrix.setCraftingGrid(this);
-        activeMatrix.setActive(true);
         activeMatrix.changed();
         activeMatrix.levelChanged();
+        activeMatrix.setActive(true);
         C2SPackets.sendCraftingGridWorkstationChange(workstationid);
     }
 
