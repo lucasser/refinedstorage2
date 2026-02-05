@@ -44,6 +44,8 @@ public class CraftingGridBlockEntity extends AbstractGridBlockEntity implements 
     @Nullable
     private AbstractCraftingMatrix activeMatrix;
 
+    private final CompoundTag workstationData = new CompoundTag();
+
     public CraftingGridBlockEntity(final BlockPos pos, final BlockState state) {
         super(
             BlockEntities.INSTANCE.getCraftingGrid(),
@@ -163,12 +165,14 @@ public class CraftingGridBlockEntity extends AbstractGridBlockEntity implements 
     @Override
     public void saveAdditional(final CompoundTag tag, final HolderLookup.Provider provider) {
         super.saveAdditional(tag, provider);
-        final CompoundTag workstationList = new CompoundTag();
-        matrixList.forEach(matrix -> {
-            workstationList.put(matrix.getWorkstationType().toString(), matrix.writeToTag(provider));
-        });
-        tag.put(TAG_WORKSTATION_LIST, workstationList);
-        tag.putInt(TAG_WORKSTATION_AMOUNT, matrixList.size());
+        tag.put(TAG_WORKSTATION_LIST, workstationData);
+
+//        final CompoundTag workstationList = new CompoundTag();
+//        matrixList.forEach(matrix -> {
+//            workstationList.put(matrix.getWorkstationType().toString(), matrix.writeToTag(provider));
+//        });
+//        tag.put(TAG_WORKSTATION_LIST, workstationList);
+//        tag.putInt(TAG_WORKSTATION_AMOUNT, matrixList.size());
     }
 
 
@@ -177,7 +181,7 @@ public class CraftingGridBlockEntity extends AbstractGridBlockEntity implements 
     public void loadAdditional(final CompoundTag tag, final HolderLookup.Provider provider) {
         super.loadAdditional(tag, provider);
         if (tag.contains(TAG_WORKSTATION_LIST)) {
-            makeWorkstationList(tag.getCompound(TAG_WORKSTATION_LIST), provider);
+            workstationData.merge(tag.getCompound(TAG_WORKSTATION_LIST));
         }
     }
 
