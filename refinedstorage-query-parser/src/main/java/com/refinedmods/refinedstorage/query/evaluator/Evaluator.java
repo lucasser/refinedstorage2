@@ -29,7 +29,7 @@ import static java.util.Objects.requireNonNull;
 public class Evaluator {
     private final Source source;
     private final List<Node> nodes = new ArrayList<>();
-    private final Map<String, Double> unitMap = Map.of(
+    private final Map<String, Double> multipliers = Map.of(
         "k", 1e3,
         "m", 1e6,
         "g", 1e9,
@@ -37,6 +37,8 @@ public class Evaluator {
         "p", 1e15,
         "e", 1e18
     );
+
+    private final Map<String, Double> constants = Map.of();
 
     public Evaluator(final Source source) {
         if (source.content().isEmpty()) {
@@ -63,29 +65,46 @@ public class Evaluator {
     private List<Token> applyUnits(final List<Token> tokens) {
         final List<Token> output = new ArrayList<>();
         for (final Token token : tokens) {
-            if (token.type() == TokenType.IDENTIFIER) {
-                if (output.isEmpty()) {
-                    throw new EvaluatorException("no number before unit character " + token.content());
-                }
-                final TokenType lastType = output.getLast().type();
-                if (lastType != TokenType.INTEGER_NUMBER && lastType != TokenType.FLOATING_NUMBER) {
-                    throw new EvaluatorException("no number before unit character " + token.content());
-                }
-                final TokenPosition position = new TokenPosition(source, new TokenRange(0, 0, 0, 0));
-                output.add(new Token("*", TokenType.BIN_OP, position));
-                try {
-                    final Double multiplier = unitMap.get(token.content().toLowerCase());
-                    final String stringMultiplier = String.valueOf(requireNonNull(multiplier));
-                    output.add(new Token(stringMultiplier, TokenType.FLOATING_NUMBER, position));
-                } catch (NullPointerException e) {
-                    throw new EvaluatorException("unrecognized unit " + token.content());
-                }
-                continue;
-            }
             output.add(token);
         }
         return output;
     }
+
+    private List<Token> expandConstantsAndMultipliers(final Token stringToken) {
+        final List<Token> toReturn = new ArrayList<>();
+        if (stringToken.type() == TokenType.IDENTIFIER) {
+            final TokenPosition position = new TokenPosition(source, new TokenRange(0, 0, 0, 0));
+            toReturn.add(new Token("*", TokenType.BIN_OP, position));
+            try {
+                final Double multiplier = multipliers.get(stringToken.content().toLowerCase());
+                final String stringMultiplier = String.valueOf(requireNonNull(multiplier));
+                toReturn.add(new Token(stringMultiplier, TokenType.FLOATING_NUMBER, position));
+            } catch (NullPointerException e) {
+                throw new EvaluatorException("unrecognized unit " + token.content());
+            }
+        }
+
+        return toReturn;
+    }
+
+    //Parse literal into Double number and Double multiplier
+    private NumberMultiplierPair splitLiteral(final String stringWithMultiplier) {
+        final StringBuilder number = new StringBuilder();
+        final StringBuilder multiplier = new StringBuilder();
+
+        for (final char c : stringWithMultiplier.toCharArray()) {
+            if (Character.isDigit(c) && multiplier.isEmpty()) {
+                number.append(c);
+            } else {
+                multiplier.append(c);
+            }
+        }
+
+        // Convert StringBuilder to String and print
+        String a = r.toString().trim();
+    }
+
+    private record NumberMultiplierPair(Double number, String multiplier) {}
 
     public double evaluate() {
         return compute(nodes.getFirst());

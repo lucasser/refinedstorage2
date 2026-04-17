@@ -3,7 +3,6 @@ package com.refinedmods.refinedstorage.common.support.amount;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
-import java.util.Optional;
 
 import net.minecraft.util.Mth;
 import org.jspecify.annotations.Nullable;

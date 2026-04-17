@@ -6,9 +6,9 @@ import com.refinedmods.refinedstorage.query.lexer.Source;
 
 import java.text.DecimalFormat;
 import java.util.Objects;
-import javax.annotation.Nullable;
 
 import net.minecraft.util.Mth;
+import org.jspecify.annotations.Nullable;
 
 
 public class ExpressionAmountOperations implements AmountOperations<Double> {

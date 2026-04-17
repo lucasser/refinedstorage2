@@ -2,12 +2,10 @@ package com.refinedmods.refinedstorage.common.support.amount;
 
 import com.refinedmods.refinedstorage.common.autocrafting.patterngrid.AlternativesScreen;
 import com.refinedmods.refinedstorage.common.support.AbstractBaseScreen;
-import java.util.Optional;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
